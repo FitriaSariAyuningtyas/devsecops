@@ -133,3 +133,42 @@ Screenshot menunjukkan bahwa direktori `reports`, `sbom`, dan `keys` tersedia de
 Hasil pemeriksaan menunjukkan bahwa ketiga direktori tersebut telah tersedia dengan permission `drwxr-xr-x` dan dimiliki oleh pengguna `asus` dengan group `docker`.
 
 Pemeriksaan ini digunakan untuk mengetahui kondisi permission pada direktori. Konfigurasi web server tidak diperiksa pada praktikum ini, sehingga status direktori tersebut sebagai web root belum dapat diverifikasi.
+
+## 6. Threat Statement
+
+Aset yang perlu dilindungi dalam lingkungan DevSecOps meliputi source code aplikasi, konfigurasi, laporan hasil pengujian, SBOM, serta key atau informasi sensitif lainnya. Aktor ancaman dapat berupa pihak yang tidak memiliki hak akses maupun pihak internal yang menyalahgunakan akses. Jalur serangan dapat berasal dari akses terhadap lingkungan pengembangan, container, konfigurasi, atau penyimpanan artefak yang tidak terlindungi. Dampak yang mungkin terjadi meliputi kebocoran informasi, perubahan source code atau artefak, kompromi sistem, serta terganggunya proses pengembangan dan delivery aplikasi.
+
+## 7. Analisis
+
+Berdasarkan hasil praktikum, lingkungan laboratorium DevSecOps telah memiliki struktur direktori dan perangkat yang diperlukan untuk melakukan praktikum berikutnya. Versi Docker, Docker Compose, Git, OpenSSL, dan cURL telah berhasil dicatat sebagai baseline sehingga kondisi lingkungan dapat diketahui dan dibandingkan apabila terjadi perubahan.
+
+Hasil pemeriksaan Security Options Docker menunjukkan adanya `seccomp` dengan profil bawaan dan `cgroupns`. Hal ini menunjukkan bahwa terdapat mekanisme keamanan yang tersedia pada lingkungan Docker. Namun, hasil tersebut belum dapat dijadikan bukti bahwa seluruh container telah dikonfigurasi dengan aman karena masih diperlukan pemeriksaan terhadap konfigurasi dan penggunaan container secara lebih lanjut.
+
+Verifikasi terhadap direktori `reports`, `sbom`, dan `keys` juga menunjukkan bahwa direktori tersebut tersedia dan memiliki permission `drwxr-xr-x`. Pemeriksaan ini dapat digunakan sebagai informasi awal mengenai kondisi permission, tetapi belum membuktikan bahwa direktori tersebut tidak dapat diakses melalui web server karena konfigurasi web server belum diperiksa.
+
+Dari praktikum ini dapat dipahami bahwa baseline penting dalam DevSecOps karena memberikan kondisi awal yang dapat digunakan sebagai dasar untuk melakukan pemeriksaan dan evaluasi pada tahap berikutnya. Selain itu, setiap klaim mengenai keamanan sebaiknya didukung oleh bukti yang dapat diperiksa, bukan hanya berdasarkan asumsi bahwa suatu mekanisme keamanan telah tersedia.
+
+## 8. Tindak Lanjut
+
+Berdasarkan hasil praktikum, beberapa tindak lanjut yang dapat dilakukan adalah:
+
+1. Melakukan pemeriksaan konfigurasi web server untuk memastikan direktori `reports`, `sbom`, dan `keys` tidak dapat diakses secara langsung melalui web.
+2. Melakukan pemeriksaan permission yang lebih ketat pada direktori `keys` apabila nantinya digunakan untuk menyimpan informasi sensitif.
+3. Mencatat kembali versi perangkat dan konfigurasi lingkungan apabila terjadi perubahan pada sistem atau perangkat yang digunakan.
+4. Melakukan pemeriksaan konfigurasi container pada praktikum berikutnya untuk memastikan mekanisme keamanan yang tersedia telah diterapkan dengan sesuai.
+5. Menyimpan bukti hasil pemeriksaan sebagai dokumentasi agar setiap perubahan atau temuan dapat ditelusuri pada tahap berikutnya.
+
+## 9. Kesimpulan
+
+Berdasarkan praktikum yang telah dilakukan, dapat disimpulkan bahwa baseline laboratorium DevSecOps berhasil dibuat dan kondisi awal lingkungan berhasil didokumentasikan. Struktur direktori `devsecops-lab` beserta subdirektori yang diperlukan telah berhasil dibuat. Versi Docker, Docker Compose, Git, OpenSSL, dan cURL juga berhasil diperiksa dan dicatat.
+
+Hasil pemeriksaan Security Options Docker menunjukkan adanya mekanisme `seccomp` dengan profil bawaan dan `cgroupns`. Selain itu, permission pada direktori `reports`, `sbom`, dan `keys` telah berhasil diverifikasi. Praktikum ini menunjukkan bahwa pencatatan kondisi awal dan penggunaan bukti hasil pemeriksaan penting dilakukan dalam proses DevSecOps agar kondisi lingkungan dapat diketahui dan perubahan dapat ditelusuri.
+
+Keamanan dalam DevSecOps tidak hanya bergantung pada penggunaan tools, tetapi juga membutuhkan proses pemeriksaan, bukti yang dapat diverifikasi, serta pembagian tanggung jawab yang jelas.
+
+## 10. Referensi
+
+1. Ferry Astika Saputra. *Bab 1 – Fondasi Teoretis dan Kerangka Kerja DevSecOps*. Materi praktikum DevSecOps PENS, 2026.
+
+2. Ferry Astika Saputra. *Laporan Praktikum Bab 1 – DevSecOps*. Contoh laporan praktikum DevSecOps PENS, 2026.
+
