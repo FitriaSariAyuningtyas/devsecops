@@ -75,6 +75,57 @@ Perintah yang digunakan:
 ls -ld reports sbom keys
 ```
 
+## 5. Hasil Pengujian
+
+### 5.1 Hasil Perintah Utama
+
+Berdasarkan perintah yang telah dijalankan, struktur direktori dan perangkat yang digunakan pada lingkungan praktikum berhasil diperiksa. Hasil pemeriksaan yang diperoleh adalah sebagai berikut.
+
+| Pemeriksaan             | Hasil                                                                    |
+| ----------------------- | ------------------------------------------------------------------------ |
+| Struktur direktori      | Direktori `app`, `policy`, `reports`, `sbom`, dan `keys` berhasil dibuat |
+| Docker Engine           | 29.7.2                                                                   |
+| Docker Compose          | v5.5.0                                                                   |
+| Git                     | 2.53.0                                                                   |
+| OpenSSL                 | 3.5.5                                                                    |
+| cURL                    | 8.18.0                                                                   |
+| Docker Security Options | `seccomp (builtin)` dan `cgroupns`                                       |
+| Permission `reports`    | `drwxr-xr-x`                                                             |
+| Permission `sbom`       | `drwxr-xr-x`                                                             |
+| Permission `keys`       | `drwxr-xr-x`                                                             |
+
+Dari hasil tersebut dapat diketahui bahwa seluruh perangkat utama yang diperlukan untuk praktikum telah tersedia dan dapat digunakan. Struktur direktori yang dibutuhkan juga berhasil dibuat.
+
+### 5.2 Bukti Output
+
+Berikut merupakan bukti hasil pemeriksaan yang dilakukan pada lingkungan praktikum.
+
+**Gambar 1. Struktur Direktori Laboratorium DevSecOps**
+
+> `<img width="1216" height="124" alt="1" src="https://github.com/user-attachments/assets/2e287cea-fef8-4249-ac04-86b756c58fa7" />
+> <img width="766" height="326" alt="2" src="https://github.com/user-attachments/assets/f20677ed-e65b-4fc8-97d9-441ed88898d8" />`
+
+Screenshot menunjukkan bahwa direktori `devsecops-lab` telah memiliki subdirektori `app`, `policy`, `reports`, `sbom`, dan `keys`.
+
+**Gambar 2. Hasil Pemeriksaan Versi Perangkat**
+
+> `[MASUKKAN SCREENSHOT VERSI DOCKER, DOCKER COMPOSE, GIT, OPENSSL, DAN CURL DI SINI]`
+
+Screenshot menunjukkan versi perangkat yang digunakan pada lingkungan praktikum.
+
+**Gambar 3. Hasil Pemeriksaan Security Options Docker**
+
+> `[MASUKKAN SCREENSHOT SECURITY OPTIONS DI SINI]`
+
+Hasil pemeriksaan menunjukkan adanya mekanisme `seccomp` dengan profil bawaan dan `cgroupns` pada lingkungan Docker.
+
+**Gambar 4. Hasil Verifikasi Permission Direktori**
+
+> `[MASUKKAN SCREENSHOT PERMISSION REPORTS, SBOM, DAN KEYS DI SINI]`
+
+Screenshot menunjukkan bahwa direktori `reports`, `sbom`, dan `keys` tersedia dengan permission `drwxr-xr-x` serta dimiliki oleh pengguna `asus` dan group `docker`.
+
+
 Hasil pemeriksaan menunjukkan bahwa ketiga direktori tersebut telah tersedia dengan permission `drwxr-xr-x` dan dimiliki oleh pengguna `asus` dengan group `docker`.
 
 Pemeriksaan ini digunakan untuk mengetahui kondisi permission pada direktori. Konfigurasi web server tidak diperiksa pada praktikum ini, sehingga status direktori tersebut sebagai web root belum dapat diverifikasi.
