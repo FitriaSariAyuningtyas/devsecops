@@ -119,13 +119,13 @@ Screenshot menunjukkan versi perangkat yang digunakan pada lingkungan praktikum.
 
 **Gambar 3. Hasil Pemeriksaan Security Options Docker**
 
-> `[MASUKKAN SCREENSHOT SECURITY OPTIONS DI SINI]`
+>![Gambar 1 - Struktur Direktori Laboratorium DevSecOps](assets/ss-08-security-options-docker.jpg)
 
 Hasil pemeriksaan menunjukkan adanya mekanisme `seccomp` dengan profil bawaan dan `cgroupns` pada lingkungan Docker.
 
 **Gambar 4. Hasil Verifikasi Permission Direktori**
 
-> `[MASUKKAN SCREENSHOT PERMISSION REPORTS, SBOM, DAN KEYS DI SINI]`
+> ![Gambar 1 - Struktur Direktori Laboratorium DevSecOps](assets/ss-09-permission-direktori.jpg)
 
 Screenshot menunjukkan bahwa direktori `reports`, `sbom`, dan `keys` tersedia dengan permission `drwxr-xr-x` serta dimiliki oleh pengguna `asus` dan group `docker`.
 
