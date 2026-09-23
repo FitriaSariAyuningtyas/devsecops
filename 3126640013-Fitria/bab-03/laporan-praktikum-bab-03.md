@@ -119,5 +119,44 @@ ls -lh data-vol-backup.tar.gz
 
 Hasil pengujian menunjukkan bahwa file `log.txt` masih dapat dibaca setelah container `writer` dihapus. File `data-vol-backup.tar.gz` juga berhasil dibuat sebagai hasil backup isi volume. Hal ini menunjukkan bahwa named volume dapat mempertahankan data meskipun container yang menggunakannya telah dihapus.
 
+### 4.3 Bind Mount
+
+Bind mount digunakan untuk memetakan direktori pada host secara langsung ke dalam container. Pada pengujian ini, direktori `bind-test` pada host dipetakan ke direktori `/usr/share/nginx/html` di dalam container Nginx menggunakan mode read-only.
+
+Perintah yang digunakan:
+
+```bash
+echo "Hello from host!" > bind-test/index.html
+
+docker run -d --name bind-test-nginx \
+  -v $(pwd)/bind-test:/usr/share/nginx/html:ro \
+  nginx:alpine
+```
+
+Isi file kemudian diperiksa dari dalam container:
+
+```bash
+docker exec bind-test-nginx cat /usr/share/nginx/html/index.html
+```
+
+Selanjutnya, file pada host diubah:
+
+```bash
+echo "Hello after host change!" > bind-test/index.html
+```
+
+Perubahan diperiksa kembali dari dalam container:
+
+```bash
+docker exec bind-test-nginx cat /usr/share/nginx/html/index.html
+```
+
+**Bukti pengujian:**
+
+![Gambar 3 - Bind mount](assets/ss03-bind-mount.png)
+
+Hasil pengujian menunjukkan bahwa file `index.html` pada host dapat dibaca dari dalam container. Setelah isi file pada host diubah menjadi `Hello after host change!`, perubahan tersebut dapat langsung dibaca dari dalam container tanpa melakukan rebuild atau restart container. Hal ini menunjukkan bahwa bind mount memungkinkan container menggunakan file yang dikelola langsung dari host.
+
+
 
 
