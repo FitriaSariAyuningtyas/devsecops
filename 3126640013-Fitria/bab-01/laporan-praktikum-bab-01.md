@@ -125,7 +125,7 @@ Hasil pemeriksaan menunjukkan adanya mekanisme `seccomp` dengan profil bawaan da
 
 **Gambar 4. Hasil Verifikasi Permission Direktori**
 
-> ![Gambar 1 - Struktur Direktori Laboratorium DevSecOps](assets/ss-09-permission-direktori.jpg)
+> ![Gambar 1 - Struktur Direktori Laboratorium DevSecOps](assets/ss-09-permisson-direktori.jpg)
 
 Screenshot menunjukkan bahwa direktori `reports`, `sbom`, dan `keys` tersedia dengan permission `drwxr-xr-x` serta dimiliki oleh pengguna `asus` dan group `docker`.
 
