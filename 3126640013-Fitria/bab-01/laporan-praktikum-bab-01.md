@@ -102,8 +102,7 @@ Berikut merupakan bukti hasil pemeriksaan yang dilakukan pada lingkungan praktik
 
 **Gambar 1. Struktur Direktori Laboratorium DevSecOps**
 
-> `<img width="1216" height="124" alt="1" src="https://github.com/user-attachments/assets/2e287cea-fef8-4249-ac04-86b756c58fa7" />
-> <img width="766" height="326" alt="2" src="https://github.com/user-attachments/assets/f20677ed-e65b-4fc8-97d9-441ed88898d8" />`
+> `[MASUKKAN SCREENSHOT VERSI DOCKER, DOCKER COMPOSE, GIT, OPENSSL, DAN CURL DI SINI]`
 
 Screenshot menunjukkan bahwa direktori `devsecops-lab` telah memiliki subdirektori `app`, `policy`, `reports`, `sbom`, dan `keys`.
 
