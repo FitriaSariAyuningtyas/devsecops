@@ -153,7 +153,7 @@ docker exec bind-test-nginx cat /usr/share/nginx/html/index.html
 
 **Bukti pengujian:**
 
-![Gambar 3 - Bind mount](assets/ss03-bind-mount.png)
+![Gambar 3 - Bind mount](assets/ss03-bind-mount.jpg)
 
 Hasil pengujian menunjukkan bahwa file `index.html` pada host dapat dibaca dari dalam container. Setelah isi file pada host diubah menjadi `Hello after host change!`, perubahan tersebut dapat langsung dibaca dari dalam container tanpa melakukan rebuild atau restart container. Hal ini menunjukkan bahwa bind mount memungkinkan container menggunakan file yang dikelola langsung dari host.
 
