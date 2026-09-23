@@ -197,6 +197,39 @@ docker exec tmpfs-restart ls -la /app/tmp
 
 Hasil pengujian menunjukkan bahwa file `test.txt` dapat dibaca sebelum container di-restart. Setelah restart, file tersebut tidak ditemukan pada direktori `/app/tmp`. Hal ini menunjukkan bahwa data pada tmpfs bersifat sementara dan tidak dipertahankan setelah container di-restart.
 
+### 4.5 Docker Compose
+
+Docker Compose digunakan untuk menjalankan beberapa service dalam satu konfigurasi. Pada praktikum ini digunakan tiga service, yaitu Nginx sebagai web server dan reverse proxy, Flask sebagai backend, serta PostgreSQL sebagai database.
+
+Konfigurasi Docker Compose menggunakan dua network, yaitu `frontend` dan `backend`. Service `web` terhubung ke network `frontend`, service `app` terhubung ke `frontend` dan `backend`, sedangkan service `db` hanya terhubung ke `backend`. PostgreSQL juga dilengkapi dengan healthcheck untuk memastikan database siap menerima koneksi sebelum service Flask dijalankan.
+
+Perintah untuk memeriksa konfigurasi Docker Compose:
+
+```bash
+cd ~/docker-lab/bab-3/compose-lab
+
+docker compose config
+docker compose config --services
+```
+
+Selanjutnya seluruh service dijalankan dengan proses build:
+
+```bash
+docker compose up -d --build
+```
+
+Status service diperiksa menggunakan:
+
+```bash
+docker compose ps
+```
+
+**Bukti pengujian:**
+
+![Gambar 5 - Status service Docker Compose](assets/ss05-compose-ps.jpg)
+
+Hasil pengujian menunjukkan bahwa service `web`, `app`, dan `db` berhasil dijalankan. PostgreSQL berstatus `healthy`, sedangkan Nginx dapat diakses melalui port `8080`. Hal ini menunjukkan bahwa seluruh service dalam Docker Compose berhasil dijalankan sesuai konfigurasi.
+
 
 
 
