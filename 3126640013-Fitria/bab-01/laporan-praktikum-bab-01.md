@@ -103,6 +103,7 @@ Berikut merupakan bukti hasil pemeriksaan yang dilakukan pada lingkungan praktik
 **Gambar 1. Struktur Direktori Laboratorium DevSecOps**
 
 > ![Gambar 1 - Struktur Direktori Laboratorium DevSecOps](assets/ss-01-struktur-direktori.jpg)
+>  ![Gambar 1 - Struktur Direktori Laboratorium DevSecOps](assets/ss-02-struktur-direktori.jpg)
 
 Screenshot menunjukkan bahwa direktori `devsecops-lab` telah memiliki subdirektori `app`, `policy`, `reports`, `sbom`, dan `keys`.
 
