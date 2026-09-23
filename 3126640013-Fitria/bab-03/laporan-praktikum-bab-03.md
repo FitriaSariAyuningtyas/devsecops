@@ -274,6 +274,21 @@ http://localhost:8080/static.html
 
 Hasil pengujian menunjukkan bahwa halaman `static.html` berhasil ditampilkan melalui Nginx. Hal ini menunjukkan bahwa bind mount pada service `web` dapat digunakan untuk menyajikan file statis dari host melalui Nginx.
 
+### 4.8 Pengujian Log Docker Compose
+
+Pengujian log dilakukan untuk memeriksa aktivitas dan status service yang berjalan pada Docker Compose. Log digunakan untuk melihat apakah Nginx, Flask, dan PostgreSQL berhasil berjalan serta untuk membantu menemukan masalah yang terjadi selama pengujian.
+
+Perintah yang digunakan:
+
+```bash id="4b9n3v"
+docker compose logs --tail 50
+```
+
+**Bukti pengujian:**
+
+![Gambar 9 - Cuplikan log Docker Compose](assets/ss09-compose-logs.jpg)
+
+Hasil pengujian menunjukkan bahwa PostgreSQL berhasil berjalan dan siap menerima koneksi, Gunicorn berhasil menjalankan aplikasi Flask, serta Nginx berhasil melayani request. Pada log juga terlihat request halaman `/` dan `/health` berhasil dengan status `200`. Terdapat request `/static.html` yang sempat menghasilkan `404`, kemudian berhasil menghasilkan `200` setelah file statis tersedia.
 
 
 
