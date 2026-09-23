@@ -228,9 +228,19 @@ docker compose ps
 
 ![Gambar 5 - Status service Docker Compose](assets/ss05-compose-ps.jpg)
 
-![Gambar 5 - Status service Docker Compose](assets/ss06-curl-root.jpg)
+
 
 Hasil pengujian menunjukkan bahwa service `web`, `app`, dan `db` berhasil dijalankan. PostgreSQL berstatus `healthy`, sedangkan Nginx dapat diakses melalui port `8080`. Hal ini menunjukkan bahwa seluruh service dalam Docker Compose berhasil dijalankan sesuai konfigurasi.
+
+Pengujian koneksi antar-service dilakukan dengan mengakses endpoint utama melalui Nginx:
+
+curl http://localhost:8080/
+
+Bukti pengujian:
+
+![Gambar 5 - Status service Docker Compose](assets/ss06-curl-root.jpg)
+
+Hasil pengujian menunjukkan bahwa Nginx berhasil meneruskan request ke Flask dan Flask berhasil terhubung dengan PostgreSQL. Endpoint mengembalikan status ok, sehingga komunikasi antar-service berjalan dengan baik.
 
 ### 4.6 Health Check
 
