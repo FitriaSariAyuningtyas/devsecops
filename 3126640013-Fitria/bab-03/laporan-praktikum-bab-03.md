@@ -290,6 +290,142 @@ docker compose logs --tail 50
 
 Hasil pengujian menunjukkan bahwa PostgreSQL berhasil berjalan dan siap menerima koneksi, Gunicorn berhasil menjalankan aplikasi Flask, serta Nginx berhasil melayani request. Pada log juga terlihat request halaman `/` dan `/health` berhasil dengan status `200`. Terdapat request `/static.html` yang sempat menghasilkan `404`, kemudian berhasil menghasilkan `200` setelah file statis tersedia.
 
+## 5. Hasil Pengujian
+
+### 5.1 Hasil Perintah Utama
+
+Hasil pengujian utama pada praktikum ini meliputi pengujian komunikasi antar-container, persistence data, bind mount, tmpfs, serta komunikasi antar-service pada Docker Compose.
+
+| **Pengujian**       | **Hasil**                                                                                               |
+| ------------------- | ------------------------------------------------------------------------------------------------------- |
+| User-defined bridge | `server-a` berhasil berkomunikasi dengan `server-b` menggunakan nama container dengan `0% packet loss`. |
+| Named volume        | Data `log.txt` tetap tersedia setelah container `writer` dihapus.                                       |
+| Bind mount          | Perubahan file pada host dapat langsung dibaca dari dalam container.                                    |
+| tmpfs               | File sementara tidak tersedia setelah container di-restart.                                             |
+| Docker Compose      | Service `web`, `app`, dan `db` berhasil berjalan, dengan PostgreSQL berstatus `healthy`.                |
+| Endpoint utama      | Nginx, Flask, dan PostgreSQL berhasil terhubung dan endpoint mengembalikan status `ok`.                 |
+| Health check        | Endpoint `/health` mengembalikan `HTTP 200 OK` dengan status `healthy`.                                 |
+| Halaman statis      | Nginx berhasil menampilkan halaman `static.html`.                                                       |
+| Log                 | Log menunjukkan service berjalan dan request berhasil dilayani.                                         |
+
+### 5.2 Bukti Output
+
+Bukti output praktikum ditunjukkan melalui screenshot hasil pengujian pada setiap tahapan. Dokumentasi pengujian meliputi network, volume, bind mount, tmpfs, Docker Compose, endpoint aplikasi, health check, halaman statis, dan log service.
+
+| **Gambar** | **Bukti Pengujian**                                        |
+| ---------- | ---------------------------------------------------------- |
+| Gambar 1   | User-defined bridge network dan komunikasi antar-container |
+| Gambar 2   | Persistence dan backup named volume                        |
+| Gambar 3   | Pengujian bind mount                                       |
+| Gambar 4   | Pengujian tmpfs sebelum dan setelah restart                |
+| Gambar 5   | Status service Docker Compose                              |
+| Gambar 6   | Koneksi Nginx, Flask, dan PostgreSQL                       |
+| Gambar 7   | Health check aplikasi                                      |
+| Gambar 8   | Halaman statis melalui Nginx                               |
+| Gambar 9   | Log Docker Compose                                         |
+
+Seluruh bukti pengujian menunjukkan bahwa konfigurasi container dan service dapat berjalan sesuai dengan rancangan yang telah dibuat. Dokumentasi juga digunakan sebagai dasar untuk melakukan analisis terhadap hasil pengujian dan masalah yang ditemukan selama praktikum.
+
+## 6. Threat Statement
+
+Pada lingkungan container yang digunakan dalam praktikum ini terdapat beberapa aset yang perlu dilindungi, yaitu data pada named volume, file pada bind mount, service aplikasi Flask, konfigurasi Nginx, serta database PostgreSQL.
+
+Potensi ancaman dapat berasal dari kesalahan konfigurasi container, akses berlebihan terhadap file host melalui bind mount, serta pengelolaan kredensial database yang tidak aman. Bind mount dengan akses tulis dan direktori yang terlalu luas dapat memungkinkan perubahan terhadap file pada host apabila container mengalami kompromi.
+
+Selain itu, kredensial database yang dituliskan secara langsung pada file konfigurasi Docker Compose dapat meningkatkan risiko kebocoran apabila file konfigurasi tersebut diakses oleh pihak yang tidak berwenang.
+
+Dampak yang mungkin terjadi meliputi perubahan atau kehilangan data, gangguan terhadap service, serta terbukanya informasi sensitif. Oleh karena itu, konfigurasi container perlu menggunakan prinsip least privilege, membatasi akses bind mount, menggunakan mount read-only jika memungkinkan, dan menerapkan pengelolaan secret yang lebih aman untuk lingkungan produksi.
+
+## 7. Analisis
+
+Hasil praktikum menunjukkan bahwa user-defined bridge network dapat digunakan untuk menghubungkan container dan memungkinkan komunikasi menggunakan nama container. Pengujian `ping` dari `server-a` ke `server-b` berhasil dengan `0% packet loss`, sehingga komunikasi pada network `lab-net` berjalan dengan baik.
+
+Pada pengujian named volume, data `log.txt` tetap dapat dibaca setelah container `writer` dihapus. Hal ini menunjukkan bahwa lifecycle data pada named volume terpisah dari lifecycle container. Backup volume juga berhasil dibuat dalam bentuk file `data-vol-backup.tar.gz`.
+
+Pada pengujian bind mount, perubahan file pada host dapat langsung terlihat dari dalam container. Sementara itu, pengujian tmpfs menunjukkan bahwa file sementara tidak tersedia setelah container di-restart. Hasil tersebut sesuai dengan karakteristik masing-masing mekanisme penyimpanan.
+
+Pada Docker Compose, service `web`, `app`, dan `db` berhasil berjalan. PostgreSQL menunjukkan status `healthy`, sedangkan endpoint utama berhasil mengembalikan informasi bahwa Nginx, Flask, dan PostgreSQL telah terhubung. Endpoint `/health` juga mengembalikan status `200 OK` dengan response `{"status":"healthy"}`.
+
+### 7.1 Masalah dan Diagnosis
+
+Pada pengujian awal halaman statis, akses ke:
+
+```text
+http://localhost:8080/static.html
+```
+
+menghasilkan response `404 Not Found`. Pemeriksaan terhadap direktori `html` menunjukkan bahwa file `static.html` belum tersedia dan hanya terdapat file `index.html`.
+
+Masalah tersebut diperbaiki dengan membuat salinan file `index.html` menjadi `static.html`:
+
+```bash
+cp html/index.html html/static.html
+```
+
+Setelah file tersedia, pengujian ulang terhadap `/static.html` berhasil dan halaman dapat ditampilkan melalui browser. Log Docker Compose juga menunjukkan bahwa request `/static.html` yang sebelumnya menghasilkan `404` kemudian berhasil menghasilkan status `200`.
+
+Hal ini menunjukkan bahwa pemeriksaan log dan pengecekan file pada host dapat digunakan untuk membantu menemukan dan memperbaiki masalah konfigurasi atau file pada lingkungan Docker Compose.
+
+## 8. Tindak Lanjut
+
+Berdasarkan hasil pengujian dan analisis, beberapa tindak lanjut yang dapat dilakukan untuk meningkatkan keamanan dan keandalan lingkungan container adalah sebagai berikut:
+
+1. **Membatasi bind mount**
+   Direktori yang dipasang melalui bind mount sebaiknya dibatasi hanya pada file atau folder yang diperlukan. Penggunaan mode read-only seperti `:ro` dapat diterapkan jika container tidak perlu melakukan perubahan terhadap file host.
+
+2. **Mengamankan kredensial database**
+   Kredensial PostgreSQL yang saat ini dituliskan secara langsung pada file Docker Compose sebaiknya dipindahkan ke mekanisme pengelolaan secret atau secret manager pada lingkungan produksi.
+
+3. **Melakukan backup secara berkala**
+   Data pada named volume perlu dicadangkan secara berkala. Backup juga perlu disimpan pada lokasi terpisah dan proses restore perlu diuji secara berkala untuk memastikan backup dapat digunakan ketika terjadi kehilangan data.
+
+4. **Menggunakan image dengan versi yang terkontrol**
+   Image container sebaiknya menggunakan versi yang jelas dan diperbarui secara berkala. Untuk lingkungan produksi, penggunaan image berdasarkan digest dapat dipertimbangkan agar image yang digunakan lebih konsisten.
+
+5. **Mempertahankan prinsip least privilege**
+   Container dan service sebaiknya hanya diberikan akses yang diperlukan. Penggunaan user non-root pada aplikasi Flask seperti `appuser` dapat dipertahankan untuk mengurangi hak akses yang tidak diperlukan.
+
+## 9. Kesimpulan
+
+Praktikum Bab 3 telah berhasil menerapkan dan menguji penggunaan Docker network, named volume, bind mount, tmpfs, serta Docker Compose. User-defined bridge berhasil digunakan untuk melakukan komunikasi antar-container menggunakan nama container.
+
+Pengujian penyimpanan menunjukkan bahwa named volume dapat mempertahankan data setelah container dihapus, bind mount dapat meneruskan perubahan file dari host ke container, sedangkan tmpfs menyimpan data secara sementara dan tidak mempertahankannya setelah container di-restart.
+
+Docker Compose berhasil digunakan untuk menjalankan service Nginx, Flask, dan PostgreSQL dengan pemisahan network frontend dan backend. Pengujian endpoint utama, health check, halaman statis, dan log menunjukkan bahwa service dapat berkomunikasi dan berjalan sesuai konfigurasi. Proses troubleshooting terhadap halaman `static.html` juga berhasil dilakukan berdasarkan hasil pengujian dan pemeriksaan log.
+
+Dari praktikum ini dapat dipahami bahwa pemilihan network, mekanisme penyimpanan, konfigurasi service, serta penerapan keamanan dan backup perlu disesuaikan dengan kebutuhan aplikasi agar lingkungan container dapat berjalan secara terkontrol dan dapat dipelihara dengan baik.
+
+## 10. Referensi
+
+1. Docker. *Docker Documentation: Get Started*.
+   https://docs.docker.com/get-started/
+
+2. Docker. *Docker Networking Overview*.
+   https://docs.docker.com/engine/network/
+
+3. Docker. *Volumes*.
+   https://docs.docker.com/engine/storage/volumes/
+
+4. Docker. *Bind mounts*.
+   https://docs.docker.com/engine/storage/bind-mounts/
+
+5. Docker. *tmpfs mounts*.
+   https://docs.docker.com/engine/storage/tmpfs/
+
+6. Docker. *Docker Compose Documentation*.
+   https://docs.docker.com/compose/
+
+7. Docker. *Compose file reference*.
+   https://docs.docker.com/reference/compose-file/
+
+8. Docker. *Docker security*.
+   https://docs.docker.com/engine/security/
+
+9. Nginx. *Nginx Documentation*.
+   https://nginx.org/en/docs/
+
+10. PostgreSQL Global Development Group. *PostgreSQL Documentation*.
+    https://www.postgresql.org/docs/
 
 
 
