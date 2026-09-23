@@ -72,4 +72,52 @@ docker network inspect lab-net
 ![Gambar 1 - User-defined bridge network](assets/ss01-network2.jpg)
 Hasil pengujian menunjukkan bahwa `server-a` berhasil berkomunikasi dengan `server-b` menggunakan nama container. Network `lab-net` menggunakan driver `bridge` dengan subnet `172.20.0.0/16`. Pengujian `ping` menghasilkan 3 paket diterima dari 3 paket yang dikirim dengan `0% packet loss`.
 
+### 4.2 Named Volume
+
+Named volume digunakan untuk menyimpan data secara terpisah dari lifecycle container. Pada pengujian ini, volume `data-vol` digunakan untuk menyimpan file `log.txt` yang dibuat oleh container `writer`.
+
+Perintah yang digunakan:
+
+```bash
+docker volume create data-vol
+
+docker run -d --name writer \
+  -v data-vol:/app/data \
+  alpine:3.20 \
+  sh -c "while true; do date >> /app/data/log.txt; sleep 5; done"
+```
+
+Setelah beberapa saat, container `writer` dihapus untuk menguji apakah data pada volume tetap tersedia:
+
+```bash
+sleep 15
+docker rm -f writer
+
+docker run --rm \
+  -v data-vol:/data \
+  alpine:3.20 \
+  cat /data/log.txt
+```
+
+Backup isi named volume dilakukan dengan:
+
+```bash
+docker run --rm \
+  -v data-vol:/source:ro \
+  -v $(pwd):/backup \
+  alpine:3.20 \
+  tar czf /backup/data-vol-backup.tar.gz -C /source .
+
+ls -lh data-vol-backup.tar.gz
+```
+
+**Bukti pengujian:**
+
+![Gambar 2 - Named volume](assets/ss02-volume1.jpg)
+
+![Gambar 2 - Named volume](assets/ss02-volume2.jpg)
+
+Hasil pengujian menunjukkan bahwa file `log.txt` masih dapat dibaca setelah container `writer` dihapus. File `data-vol-backup.tar.gz` juga berhasil dibuat sebagai hasil backup isi volume. Hal ini menunjukkan bahwa named volume dapat mempertahankan data meskipun container yang menggunakannya telah dihapus.
+
+
 
