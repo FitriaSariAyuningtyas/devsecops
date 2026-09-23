@@ -258,6 +258,22 @@ curl -i http://localhost:8080/health
 
 Hasil pengujian menunjukkan bahwa endpoint `/health` mengembalikan HTTP status `200 OK` dengan response `{"status":"healthy"}`. Hal ini menunjukkan bahwa aplikasi dapat merespons request dengan baik.
 
+### 4.7 Pengujian Halaman Statis Nginx
+
+Pengujian halaman statis dilakukan untuk memastikan Nginx dapat menyajikan file HTML yang dipasang melalui bind mount.
+
+Halaman statis diakses melalui browser menggunakan alamat:
+
+```text
+http://localhost:8080/static.html
+```
+
+**Bukti pengujian:**
+
+![Gambar 8 - Pengujian halaman statis melalui Nginx](assets/ss08-static-browser.jpg)
+
+Hasil pengujian menunjukkan bahwa halaman `static.html` berhasil ditampilkan melalui Nginx. Hal ini menunjukkan bahwa bind mount pada service `web` dapat digunakan untuk menyajikan file statis dari host melalui Nginx.
+
 
 
 
