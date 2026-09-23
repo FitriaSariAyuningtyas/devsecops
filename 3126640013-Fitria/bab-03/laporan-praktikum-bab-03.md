@@ -67,7 +67,7 @@ docker network inspect lab-net
 
 **Bukti pengujian:**
 
-![Gambar 1 - User-defined bridge network](assets/ss01-network.png)
+![Gambar 1 - User-defined bridge network](assets/ss01-network.jpg)
 
 Hasil pengujian menunjukkan bahwa `server-a` berhasil berkomunikasi dengan `server-b` menggunakan nama container. Network `lab-net` menggunakan driver `bridge` dengan subnet `172.20.0.0/16`. Pengujian `ping` menghasilkan 3 paket diterima dari 3 paket yang dikirim dengan `0% packet loss`.
 
