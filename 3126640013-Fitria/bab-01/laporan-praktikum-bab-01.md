@@ -109,7 +109,11 @@ Screenshot menunjukkan bahwa direktori `devsecops-lab` telah memiliki subdirekto
 
 **Gambar 2. Hasil Pemeriksaan Versi Perangkat**
 
-> `[MASUKKAN SCREENSHOT VERSI DOCKER, DOCKER COMPOSE, GIT, OPENSSL, DAN CURL DI SINI]`
+> ![Gambar 1 - Struktur Direktori Laboratorium DevSecOps](assets/ss-03-versi-perangkat.jpg)
+> ![Gambar 1 - Struktur Direktori Laboratorium DevSecOps](assets/ss-04-versi-perangkat.jpg)
+> ![Gambar 1 - Struktur Direktori Laboratorium DevSecOps](assets/ss-05-versi-perangkat.jpg)
+> ![Gambar 1 - Struktur Direktori Laboratorium DevSecOps](assets/ss-06-versi-perangkat.jpg)
+> ![Gambar 1 - Struktur Direktori Laboratorium DevSecOps](assets/ss-07-versi-perangkat.jpg)
 
 Screenshot menunjukkan versi perangkat yang digunakan pada lingkungan praktikum.
 
