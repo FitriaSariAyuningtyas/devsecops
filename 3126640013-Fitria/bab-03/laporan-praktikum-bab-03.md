@@ -254,7 +254,7 @@ curl -i http://localhost:8080/health
 
 **Bukti pengujian:**
 
-![Gambar 7 - Pengujian health check aplikasi](assets/ss07-health.png)
+![Gambar 7 - Pengujian health check aplikasi](assets/ss07-health.jpg)
 
 Hasil pengujian menunjukkan bahwa endpoint `/health` mengembalikan HTTP status `200 OK` dengan response `{"status":"healthy"}`. Hal ini menunjukkan bahwa aplikasi dapat merespons request dengan baik.
 
