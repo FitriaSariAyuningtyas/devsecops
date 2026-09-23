@@ -32,3 +32,49 @@ Baseline diperlukan untuk mengetahui kondisi awal lingkungan praktikum, seperti 
 | Docker Engine | 29.7.2 |
 | Docker Compose | 5.5.0 |
 | Docker Security Options | `seccomp (builtin)`, `cgroupns` |
+
+## 4. Langkah Praktikum
+
+### 4.1 Membuat Struktur Direktori
+
+Pada tahap pertama dilakukan pembuatan struktur direktori kerja untuk laboratorium DevSecOps. Direktori utama yang digunakan adalah `devsecops-lab` dengan beberapa subdirektori, yaitu `app`, `policy`, `reports`, `sbom`, dan `keys`.
+
+Perintah yang digunakan:
+
+```bash
+mkdir -p ~/devsecops-lab/{app,policy,reports,sbom,keys}
+cd ~/devsecops-lab
+```
+
+Setelah perintah dijalankan, direktori kerja berhasil dibuat dan proses praktikum dilanjutkan dari direktori `~/devsecops-lab`.
+
+### 4.2 Mencatat Versi Perangkat
+
+Tahap berikutnya dilakukan pemeriksaan versi perangkat yang digunakan dalam praktikum. Pemeriksaan ini bertujuan untuk mencatat kondisi awal lingkungan sehingga dapat diketahui versi perangkat yang digunakan selama praktikum.
+
+Perintah yang digunakan:
+
+```bash
+docker version
+docker compose version
+git --version
+openssl version
+curl --version
+docker info --format '{{json .SecurityOptions}}'
+```
+
+Dari pemeriksaan tersebut diperoleh versi Docker, Docker Compose, Git, OpenSSL, dan cURL. Selain itu, dilakukan pemeriksaan terhadap Security Options pada Docker untuk mengetahui mekanisme keamanan yang tersedia pada lingkungan Docker.
+
+### 4.3 Verifikasi Direktori dan Permission
+
+Tahap terakhir dilakukan verifikasi terhadap direktori `reports`, `sbom`, dan `keys`. Pemeriksaan dilakukan untuk memastikan direktori tersebut telah tersedia serta mengetahui permission dan kepemilikannya.
+
+Perintah yang digunakan:
+
+```bash
+ls -ld reports sbom keys
+```
+
+Hasil pemeriksaan menunjukkan bahwa ketiga direktori tersebut telah tersedia dengan permission `drwxr-xr-x` dan dimiliki oleh pengguna `asus` dengan group `docker`.
+
+Pemeriksaan ini digunakan untuk mengetahui kondisi permission pada direktori. Konfigurasi web server tidak diperiksa pada praktikum ini, sehingga status direktori tersebut sebagai web root belum dapat diverifikasi.
