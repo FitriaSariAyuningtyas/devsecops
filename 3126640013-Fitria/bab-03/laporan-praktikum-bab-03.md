@@ -157,6 +157,47 @@ docker exec bind-test-nginx cat /usr/share/nginx/html/index.html
 
 Hasil pengujian menunjukkan bahwa file `index.html` pada host dapat dibaca dari dalam container. Setelah isi file pada host diubah menjadi `Hello after host change!`, perubahan tersebut dapat langsung dibaca dari dalam container tanpa melakukan rebuild atau restart container. Hal ini menunjukkan bahwa bind mount memungkinkan container menggunakan file yang dikelola langsung dari host.
 
+### 4.4 tmpfs
+
+tmpfs digunakan untuk menyimpan data sementara pada container. Pada pengujian ini, direktori `/app/tmp` dipasang sebagai tmpfs dan digunakan untuk membuat file sementara.
+
+Perintah yang digunakan:
+
+```bash id="w8qv3x"
+docker run -d --name tmpfs-restart \
+  --tmpfs /app/tmp \
+  alpine:3.20 \
+  sleep 300
+```
+
+File sementara dibuat dan diperiksa sebelum container di-restart:
+
+```bash id="9vl2dr"
+docker exec tmpfs-restart sh -c \
+  "echo 'data sementara' > /app/tmp/test.txt"
+
+docker exec tmpfs-restart cat /app/tmp/test.txt
+```
+
+Container kemudian di-restart:
+
+```bash id="2xq9kb"
+docker restart tmpfs-restart
+```
+
+Setelah restart, isi direktori tmpfs diperiksa kembali:
+
+```bash id="q5j0nt"
+docker exec tmpfs-restart ls -la /app/tmp
+```
+
+**Bukti pengujian:**
+
+![Gambar 4 - tmpfs](assets/ss04-tmpfs.jpg)
+
+Hasil pengujian menunjukkan bahwa file `test.txt` dapat dibaca sebelum container di-restart. Setelah restart, file tersebut tidak ditemukan pada direktori `/app/tmp`. Hal ini menunjukkan bahwa data pada tmpfs bersifat sementara dan tidak dipertahankan setelah container di-restart.
+
+
 
 
 
