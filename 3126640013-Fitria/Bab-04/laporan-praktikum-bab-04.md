@@ -76,6 +76,6 @@ Praktikum dilakukan menggunakan lingkungan WSL2 Ubuntu dengan Docker sebagai pla
 
 Tahap pertama dilakukan dengan membuat struktur direktori untuk menyimpan konfigurasi Docker Compose, konfigurasi Nginx dan Apache, aplikasi Flask, sertifikat TLS, serta log Nginx.
 
-![Struktur Project](./assets/SS-01.jpeg)
+![Struktur Project](./assets/SS-01.jpg)
 
 **Gambar 2. Struktur direktori project Docker Lab Bab 4.**
