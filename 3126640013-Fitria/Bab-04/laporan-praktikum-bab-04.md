@@ -79,3 +79,101 @@ Tahap pertama dilakukan dengan membuat struktur direktori untuk menyimpan konfig
 ![Struktur Project](./assets/SS-01.jpg)
 
 **Gambar 2. Struktur direktori project Docker Lab Bab 4.**
+
+### 4.2 Pembuatan Sertifikat TLS
+
+Sertifikat TLS self-signed dibuat menggunakan OpenSSL. Sertifikat digunakan oleh Nginx untuk menyediakan layanan HTTPS pada port 443 yang dipublikasikan ke host melalui port 8443.
+
+Private key diberikan permission `600`, sedangkan sertifikat diberikan permission `644`.
+
+![Sertifikat dan Permission](./assets/SS-02.jpg)
+
+**Gambar 3. Sertifikat TLS dan permission private key.**
+
+### 4.3 Validasi Docker Compose
+
+Konfigurasi Docker Compose divalidasi sebelum container dijalankan. Validasi dilakukan untuk memastikan struktur konfigurasi dapat diproses oleh Docker Compose dan service yang didefinisikan terdiri dari `proxy`, `apache-web`, dan `flask-app`.
+
+![Validasi Docker Compose](./assets/SS-03.jpg)
+
+**Gambar 4. Hasil validasi konfigurasi Docker Compose.**
+
+### 4.4 Menjalankan Container
+
+Container dijalankan menggunakan Docker Compose dengan proses build pada aplikasi Flask. Hasil pemeriksaan menunjukkan bahwa ketiga service berhasil berjalan. Service Flask berada pada status `healthy`, sedangkan hanya Nginx yang memiliki published port ke host, yaitu port 8080 dan 8443.
+
+![Status Container](./assets/SS-04.jpg)
+
+**Gambar 5. Status container setelah Docker Compose dijalankan.**
+
+### 4.5 Pengujian HTTP Redirect ke HTTPS
+
+Pengujian pertama dilakukan dengan mengakses Nginx melalui HTTP pada port `8080`. Berdasarkan hasil pengujian, Nginx memberikan response `301 Moved Permanently` dan mengarahkan request menuju HTTPS pada port `8443`.
+
+![HTTP Redirect ke HTTPS](./assets/SS-05.jpg)
+
+**Gambar 6. Pengujian redirect HTTP ke HTTPS.**
+
+### 4.6 Pengujian HTTPS dan Reverse Proxy ke Apache
+
+Setelah memastikan HTTP diarahkan ke HTTPS, dilakukan pengujian menggunakan HTTPS pada port `8443`. Request ke path `/` diteruskan oleh Nginx menuju service Apache melalui Docker network.
+
+Hasil pengujian menunjukkan response `200 OK` dan halaman HTML dari Apache berhasil ditampilkan. Response juga menunjukkan security headers seperti `X-Content-Type-Options`, `X-Frame-Options`, dan `Referrer-Policy` yang dikonfigurasi pada Nginx.
+
+![HTTPS dan Apache](./assets/SS-06.jpg)
+
+**Gambar 7. Pengujian HTTPS dan reverse proxy menuju Apache.**
+
+### 4.7 Pengujian Flask API melalui Reverse Proxy
+
+Pengujian selanjutnya dilakukan terhadap endpoint `/api/`. Nginx meneruskan request tersebut menuju service Flask pada port `5000` melalui Docker network.
+
+Hasil pengujian menunjukkan response `200 OK` dengan format JSON. Field `forwarded_proto` bernilai `https`, sehingga dapat diketahui bahwa Nginx meneruskan informasi protokol kepada backend melalui header `X-Forwarded-Proto`.
+
+![Flask API](./assets/SS-07.jpg)
+
+**Gambar 8. Pengujian Flask API melalui reverse proxy Nginx.**
+
+### 4.8 Pengujian Healthcheck Flask
+
+Endpoint `/api/health` digunakan untuk memastikan service Flask dalam kondisi sehat dan dapat menerima request melalui Nginx. Hasil pengujian menunjukkan response `200 OK` dengan status `healthy`.
+
+![Flask Healthcheck](./assets/SS-08.jpg)
+
+**Gambar 9. Pengujian endpoint healthcheck Flask.**
+
+### 4.9 Pengujian TLS Handshake
+
+Pengujian TLS dilakukan menggunakan OpenSSL dengan menghubungkan client ke Nginx melalui port `8443`. Hasil pengujian menunjukkan bahwa koneksi berhasil dibuat menggunakan TLS versi 1.3 dengan cipher `TLS_AES_256_GCM_SHA384`.
+
+OpenSSL memberikan informasi `self-signed certificate` karena sertifikat yang digunakan dibuat sendiri untuk kebutuhan praktikum dan belum ditandatangani oleh Certificate Authority (CA) publik. Meskipun demikian, proses TLS handshake berhasil dilakukan.
+
+![TLS Handshake](./assets/SS-09.jpg)
+
+**Gambar 10. Hasil pengujian TLS handshake menggunakan OpenSSL.**
+
+## 5. Hasil Pengujian
+
+### 5.1 Pemeriksaan Docker Network
+
+Pemeriksaan Docker network dilakukan untuk melihat container yang terhubung pada network `bab-4_web-net`. Hasil pemeriksaan menunjukkan bahwa service `proxy`, `apache-web`, dan `flask-app` berada pada network bridge yang sama dengan alamat IP internal masing-masing.
+
+![Docker Network](./assets/SS-10.jpg)
+
+**Gambar 11. Container yang terhubung pada Docker network `web-net`.**
+
+### 5.2 Pengujian Komunikasi Internal Antar-Container
+
+Pengujian komunikasi internal dilakukan dari container Nginx menuju service Apache dan Flask. Nginx berhasil mengakses Apache menggunakan service name `apache-web` dan mengakses endpoint health Flask menggunakan service name `flask-app`.
+
+![Komunikasi Internal Antar-Container](./assets/SS-11.jpg)
+
+**Gambar 12. Pengujian komunikasi internal dari Nginx menuju Apache dan Flask.**
+
+### 5.3 Pemeriksaan Access Log Nginx
+
+Pemeriksaan access log dilakukan untuk memastikan request yang telah diuji tercatat pada Nginx. Log menunjukkan request HTTP yang menghasilkan status `301` serta request HTTPS ke halaman utama, API, dan healthcheck yang menghasilkan status `200`.
+
+![Nginx Access Log](./assets/SS-12.jpg)
+
+**Gambar 13. Access log Nginx dari hasil pengujian layanan.**
