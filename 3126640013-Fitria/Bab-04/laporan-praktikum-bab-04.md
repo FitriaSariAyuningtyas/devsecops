@@ -49,7 +49,7 @@ Penyimpanan tersebut mengurangi risiko perubahan atau modifikasi private key ole
 
 Penyimpanan private key pada praktikum menerapkan prinsip least privilege dan read-only mount. Private key dibuat dan disimpan pada host, kemudian digunakan oleh Nginx melalui volume mount dengan mode read-only.
 
-![Peta Konsep Penyimpanan Private Key](./gambar/Peta_Konsep.png)
+![Peta Konsep Penyimpanan Private Key](./assets/Peta_Konsep.png)
 
 **Gambar 1. Peta konsep penyimpanan dan penggunaan private key TLS.**
 
@@ -76,6 +76,6 @@ Praktikum dilakukan menggunakan lingkungan WSL2 Ubuntu dengan Docker sebagai pla
 
 Tahap pertama dilakukan dengan membuat struktur direktori untuk menyimpan konfigurasi Docker Compose, konfigurasi Nginx dan Apache, aplikasi Flask, sertifikat TLS, serta log Nginx.
 
-![Struktur Project](./gambar/SS-01.jpeg)
+![Struktur Project](./assets/SS-01.jpeg)
 
 **Gambar 2. Struktur direktori project Docker Lab Bab 4.**
