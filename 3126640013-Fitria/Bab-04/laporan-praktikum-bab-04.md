@@ -177,3 +177,89 @@ Pemeriksaan access log dilakukan untuk memastikan request yang telah diuji terca
 ![Nginx Access Log](./assets/SS-12.jpg)
 
 **Gambar 13. Access log Nginx dari hasil pengujian layanan.**
+
+## 6. Threat Statement
+
+Beberapa risiko keamanan yang perlu diperhatikan pada arsitektur web service container ini adalah akses langsung terhadap backend, kebocoran private key TLS, komunikasi tanpa enkripsi, serta penyalahgunaan header yang diteruskan oleh reverse proxy.
+
+Pada praktikum, risiko akses langsung terhadap backend dikurangi dengan tidak melakukan publish port Apache dan Flask ke host. Client hanya mengakses service melalui Nginx sebagai public boundary. Private key TLS juga diberikan permission `600` dan di-mount ke container Nginx dalam mode read-only.
+
+Selain itu, penggunaan TLS pada Nginx melindungi komunikasi client menuju reverse proxy, sedangkan security headers seperti `X-Content-Type-Options`, `X-Frame-Options`, dan `Referrer-Policy` digunakan untuk mengurangi beberapa risiko pada sisi HTTP.
+
+## 7. Analisis
+
+Selama proses menjalankan container, terdapat pesan pada log Nginx berupa `can not modify /etc/nginx/conf.d/default.conf (read-only file system?)`. Pesan tersebut muncul karena direktori konfigurasi Nginx pada host di-mount ke container menggunakan mode read-only (`:ro`). Entrypoint image Nginx mencoba melakukan modifikasi terhadap file konfigurasi default, tetapi operasi tersebut ditolak karena filesystem di dalam container bersifat read-only untuk volume tersebut.
+
+Pesan tersebut tidak menyebabkan service gagal berjalan. Hal ini dibuktikan dengan status container Nginx yang tetap `Up`, pengujian HTTPS menghasilkan response `200 OK`, serta TLS handshake berhasil menggunakan TLS 1.3. Dengan demikian, pesan tersebut merupakan konsekuensi dari konfigurasi keamanan yang digunakan dan bukan kegagalan layanan.
+
+Penggunaan mount read-only justru memberikan keuntungan keamanan karena konfigurasi dan private key yang diberikan kepada container tidak dapat dimodifikasi oleh proses di dalam container. Namun, pada lingkungan produksi konfigurasi image dan volume sebaiknya disesuaikan agar proses startup tidak menghasilkan warning yang tidak diperlukan.
+
+Selain itu, Apache menghasilkan warning mengenai fully qualified domain name ketika container dijalankan. Warning tersebut tidak mengganggu penyajian halaman karena Apache tetap berhasil melayani request melalui Nginx. Untuk lingkungan produksi, konfigurasi `ServerName` dapat ditentukan secara eksplisit agar warning tersebut tidak muncul.
+
+## 8. Tindak Lanjut
+
+Berdasarkan hasil praktikum dan analisis yang dilakukan, beberapa tindak lanjut yang dapat diterapkan untuk meningkatkan keamanan dan kesiapan sistem adalah sebagai berikut.
+
+1. **Menggunakan sertifikat dari Certificate Authority (CA) terpercaya**  
+   Sertifikat self-signed digunakan untuk kebutuhan praktikum. Pada lingkungan produksi, sertifikat sebaiknya menggunakan CA terpercaya agar client dapat memverifikasi identitas server tanpa peringatan sertifikat.
+
+2. **Menjaga private key dengan permission dan penyimpanan yang aman**  
+   Private key perlu tetap menggunakan permission yang ketat dan tidak disimpan pada repository. Pada lingkungan produksi, pengelolaan secret dapat menggunakan secret manager atau mekanisme penyimpanan secret yang sesuai.
+
+3. **Mempertahankan backend agar tidak dipublish langsung ke host**  
+   Apache dan Flask sebaiknya tetap berada di jaringan internal dan hanya dapat diakses melalui reverse proxy. Hal ini mengurangi attack surface karena backend tidak langsung tersedia dari luar.
+
+4. **Menerapkan TLS secara konsisten**  
+   Konfigurasi TLS perlu mempertahankan penggunaan protokol yang aman seperti TLS 1.2 dan TLS 1.3 serta menonaktifkan protokol lama yang sudah tidak direkomendasikan.
+
+5. **Menerapkan log rotation dan monitoring**  
+   Access log dan error log perlu dikelola menggunakan mekanisme rotasi dan monitoring agar ukuran log tidak terus bertambah dan kejadian keamanan dapat dideteksi lebih cepat.
+
+6. **Menambahkan konfigurasi readiness dan health monitoring**  
+   Healthcheck Flask sudah diterapkan pada praktikum. Pada sistem produksi, mekanisme healthcheck dapat dikembangkan menjadi readiness dan liveness check untuk memastikan service benar-benar siap menerima traffic.
+
+## 9. Kesimpulan
+
+Praktikum Bab 4 berhasil menerapkan web service container menggunakan Docker Compose dengan Nginx sebagai public boundary dan reverse proxy, Apache sebagai web server backend, serta Flask sebagai service API. Seluruh service berhasil berjalan pada Docker network yang sama dan backend tidak dipublikasikan secara langsung ke host.
+
+Hasil pengujian menunjukkan bahwa request HTTP berhasil diarahkan ke HTTPS, koneksi TLS berhasil menggunakan TLS 1.3, halaman Apache dapat diakses melalui reverse proxy, serta API Flask dan endpoint healthcheck dapat diakses melalui Nginx. Komunikasi internal antar-container juga berhasil dilakukan menggunakan service name Docker.
+
+Dari sisi keamanan, praktikum telah menerapkan pembatasan published port, permission private key, read-only volume mount, TLS, security headers, healthcheck, dan pencatatan access log. Dengan demikian, arsitektur yang dibuat telah menunjukkan penerapan dasar keamanan dan operasional web service container yang dapat dikembangkan lebih lanjut untuk lingkungan produksi.
+
+## 10. Evaluasi dan Latihan Mandiri
+
+### 1. Mengapa reverse proxy tidak seharusnya menjalankan semua logic aplikasi?
+
+Reverse proxy sebaiknya berfokus pada fungsi yang berkaitan dengan traffic seperti menerima koneksi client, terminasi TLS, routing request, load balancing, dan penerapan security header. Logic aplikasi sebaiknya tetap berada pada service backend seperti Apache atau Flask. Pemisahan ini membuat arsitektur lebih terstruktur, mudah dikembangkan, dan mengurangi beban pada reverse proxy.
+
+### 2. Apa perbedaan TLS termination dan end-to-end TLS?
+
+TLS termination adalah kondisi ketika koneksi TLS dari client berakhir pada reverse proxy. Setelah request diterima dan didekripsi oleh reverse proxy, request dapat diteruskan ke backend menggunakan HTTP atau koneksi lain di dalam jaringan.
+
+Sedangkan end-to-end TLS mempertahankan enkripsi TLS sampai ke backend. Dengan demikian, komunikasi antara reverse proxy dan backend juga tetap terenkripsi. Pada praktikum ini digunakan TLS termination pada Nginx karena sertifikat TLS dikonfigurasi pada service proxy.
+
+### 3. Bagaimana cara mengisolasi backend agar tidak langsung diakses dari host?
+
+Backend dapat diisolasi dengan menempatkan service pada Docker network dan tidak memberikan konfigurasi `ports` pada service backend. Hanya reverse proxy yang memiliki published port ke host. Pada praktikum, Apache dan Flask tidak memiliki published port sehingga client mengakses keduanya melalui Nginx.
+
+### 4. Apa konsekuensi menyimpan private key TLS di bind mount?
+
+Private key yang disimpan pada bind mount berada pada filesystem host sehingga keamanan file tersebut bergantung pada permission dan keamanan host. Jika private key dapat dibaca oleh pengguna atau proses yang tidak berwenang, penyerang dapat menggunakannya untuk menyamar sebagai server. Oleh karena itu, private key harus diberikan permission yang ketat, tidak dimasukkan ke repository, dan sebaiknya menggunakan secret management pada lingkungan produksi.
+
+### 5. Bandingkan log Nginx dan log Apache dari sisi format dan kegunaan debugging.
+
+Log Nginx pada praktikum mencatat request client pada access log dengan informasi seperti alamat IP, waktu request, HTTP method, URI, status response, ukuran response, dan user agent. Log tersebut berguna untuk melihat traffic yang masuk dan memastikan request berhasil diteruskan oleh reverse proxy.
+
+Apache juga memiliki access log dan error log yang digunakan untuk melihat request yang diterima serta masalah yang terjadi pada web server. Perbedaannya terletak pada posisi dan konteks penggunaannya. Log Nginx lebih berguna untuk menganalisis traffic pada public boundary dan proses reverse proxy, sedangkan log Apache lebih berguna untuk menganalisis request yang sudah diterima oleh backend web server.
+
+Dengan demikian, kedua log dapat digunakan secara bersamaan untuk melakukan tracing request dari client, melalui Nginx, hingga ke backend.
+
+## 11. Referensi
+
+1. Docker Documentation. *Docker Compose Documentation*.
+2. Nginx Documentation. *NGINX Reverse Proxy*.
+3. Apache HTTP Server Documentation. *Apache HTTP Server Documentation*.
+4. OpenSSL Documentation. *OpenSSL Documentation*.
+5. Flask Documentation. *Flask Documentation*.
+6. Materi Praktikum DevSecOps Bab 4 — *Web Service Container: Apache, Nginx, Reverse Proxy, dan TLS*.
+
