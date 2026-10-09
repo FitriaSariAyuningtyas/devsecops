@@ -207,25 +207,105 @@ sha256sum --check backup/*.sha256
 
 Pemeriksaan checksum hanya memastikan kesesuaian file dengan checksum yang tersedia. Pemeriksaan ini tidak membuktikan bahwa seluruh isi backup pasti dapat dipulihkan. Oleh karena itu, pengujian juga dilakukan menggunakan `pg_restore` dan pemulihan ke database `labdb_restore`.
 
-## 4.12 Evaluasi dan Latihan Mandiri
+# 5. Analisis dan Threat Statement
 
-### 1. Mengapa init script tidak dijalankan ulang saat volume lama masih ada?
+## 5.1 Analisis Hasil Praktikum
 
-Init script pada direktori `/docker-entrypoint-initdb.d` dijalankan ketika PostgreSQL pertama kali melakukan inisialisasi pada direktori data yang masih kosong. Jika volume `pg-data` sudah berisi database yang pernah dibuat, container akan menggunakan data tersebut tanpa menjalankan ulang init script. Hal ini mencegah proses inisialisasi mengulang pembuatan tabel dan memasukkan data yang sama.
+Berdasarkan praktikum yang telah dilakukan, PostgreSQL berhasil dijalankan menggunakan Docker Compose bersama pgAdmin sebagai antarmuka untuk mengelola database. Container PostgreSQL berada dalam kondisi sehat (*healthy*), sedangkan pgAdmin dapat diakses melalui browser menggunakan alamat `http://localhost:5050`.
 
-### 2. Apa risiko menaruh password database pada `docker-compose.yml`?
+Database `labdb` berhasil dibuat dengan tabel `students` yang berisi data mahasiswa. Pembuatan tabel dan data awal dilakukan melalui init script yang ditempatkan pada direktori `init/`. Data kemudian diperiksa menggunakan perintah SQL melalui terminal dan pgAdmin. Kedua cara tersebut menunjukkan data yang sesuai, sehingga koneksi dan proses penyimpanan data dapat dinyatakan berhasil.
 
-Password yang ditulis langsung pada file konfigurasi berisiko terbaca oleh orang lain, terutama jika file dimasukkan ke repositori Git atau dibagikan tanpa pengamanan. Untuk mengurangi risiko tersebut, praktikum ini menyimpan password PostgreSQL di file terpisah pada direktori `secrets/`, kemudian mengabaikan direktori tersebut melalui `.gitignore`. File password juga diberi izin akses terbatas.
+Penyimpanan data menggunakan named volume `pg-data` membuat data database tidak bergantung pada siklus hidup container. Dengan demikian, penghapusan container tanpa menghapus volume tidak secara langsung menghilangkan data yang tersimpan. Namun, volume tetap perlu dikelola dengan hati-hati karena penghapusan volume dapat menyebabkan kehilangan data.
 
-### 3. Bagaimana cara membuktikan backup dapat dipulihkan?
+Dari sisi jaringan, PostgreSQL menggunakan port internal 5432 dan tidak dipublikasikan secara langsung ke host. Komunikasi antara PostgreSQL dan pgAdmin dilakukan melalui jaringan internal Docker. Sementara itu, layanan pgAdmin dipublikasikan melalui port 5050 yang diikat ke alamat `127.0.0.1`, sehingga akses dari host dibatasi pada lingkungan lokal.
 
-Backup dapat diperiksa terlebih dahulu menggunakan `pg_restore --list` untuk melihat objek yang tersimpan di dalamnya. Integritas file juga dapat diperiksa menggunakan `sha256sum --check`. Namun, pembuktian yang lebih kuat adalah melakukan restore ke database terpisah, kemudian menjalankan query untuk memastikan struktur tabel dan data berhasil dipulihkan. Pada praktikum ini, database `labdb_restore` digunakan untuk melakukan pengujian tersebut.
+Pengamanan password PostgreSQL dilakukan dengan menyimpan kredensial dalam file secret yang memiliki izin akses terbatas. Direktori `secrets/` juga dimasukkan ke dalam `.gitignore` agar file password tidak ikut dilacak oleh Git secara normal. Meskipun demikian, pengaturan ini tetap perlu disertai pengelolaan izin akses file dan pemeriksaan sebelum melakukan commit.
 
-### 4. Apa perbedaan logical backup menggunakan `pg_dump` dan backup filesystem volume secara langsung?
+Pengujian backup dilakukan menggunakan `pg_dump` dengan format custom. File hasil backup diperiksa menggunakan `pg_restore --list`, kemudian integritas file diperiksa menggunakan SHA-256. Pengujian pemulihan dilakukan dengan mengembalikan backup ke database terpisah bernama `labdb_restore`. Data hasil pemulihan dapat ditampilkan dan sesuai dengan data yang diuji pada database utama.
 
-Logical backup menggunakan `pg_dump` menyimpan struktur dan data database dalam format yang dapat diproses oleh PostgreSQL. Backup ini lebih mudah dipindahkan dan dipulihkan ke database tujuan. Sementara itu, backup filesystem volume menyalin berkas fisik yang digunakan PostgreSQL untuk menyimpan database. Cara tersebut perlu memperhatikan konsistensi data, misalnya dengan menghentikan database secara aman atau menggunakan mekanisme snapshot yang sesuai. Backup fisik juga lebih bergantung pada versi dan kondisi penyimpanan PostgreSQL.
+Berdasarkan hasil tersebut, konfigurasi layanan, penyimpanan data, pengujian query, serta proses backup dan restore telah berhasil diterapkan pada lingkungan praktikum. Namun, konfigurasi yang digunakan masih ditujukan untuk pembelajaran lokal dan belum dapat dianggap memenuhi seluruh kebutuhan keamanan untuk lingkungan produksi.
 
-### 5. Apa dampak menjalankan `docker compose down -v` terhadap database?
+## 5.2 Threat Statement
 
-Perintah `docker compose down -v` menghentikan dan menghapus container beserta volume yang dikelola oleh konfigurasi Compose. Jika volume `pg-data` ikut dihapus, data PostgreSQL yang tersimpan di dalamnya juga dapat hilang. Volume `pgadmin-data` juga dapat terhapus. Berbeda dengan perintah `docker compose down` tanpa opsi `-v`, volume biasanya tetap dipertahankan sehingga data masih dapat digunakan ketika container dijalankan kembali.
+Threat statement digunakan untuk mengidentifikasi aset yang perlu dilindungi, ancaman yang mungkin terjadi, dampak terhadap sistem, serta langkah mitigasi yang dapat dilakukan. Pada praktikum ini, aset utama meliputi data mahasiswa, kredensial database, layanan PostgreSQL, dan file backup.
+
+### 5.2.1 Aset yang Dilindungi
+
+Aset yang perlu dilindungi dalam sistem ini meliputi:
+
+1. Data mahasiswa yang tersimpan di dalam database `labdb`.
+2. Kredensial yang digunakan untuk mengakses PostgreSQL dan pgAdmin.
+3. Layanan database PostgreSQL yang berjalan di dalam container.
+4. File backup dan checksum yang disimpan pada direktori `backup/`.
+5. Volume Docker yang menyimpan data PostgreSQL dan konfigurasi pgAdmin.
+
+### 5.2.2 Identifikasi Ancaman dan Mitigasi
+
+| Ancaman | Dampak yang Mungkin Terjadi | Mitigasi |
+|---|---|---|
+| Password database diketahui pihak yang tidak berwenang | Pihak lain dapat mencoba mengakses atau mengubah data | Menyimpan password PostgreSQL pada file secret, membatasi izin akses file, dan menghindari publikasi kredensial |
+| Port PostgreSQL terbuka ke jaringan host | Database berpotensi diakses langsung dari luar lingkungan container | Tidak memublikasikan port 5432 ke host dan menggunakan jaringan internal Docker |
+| Password pgAdmin tersimpan langsung di `compose.yaml` | Kredensial dapat diketahui jika file konfigurasi diakses pihak lain | Memindahkan kredensial ke mekanisme secret atau environment yang dikelola secara aman |
+| Volume database terhapus | Data database dapat hilang | Menghindari penghapusan volume secara sembarangan dan melakukan backup secara berkala |
+| File backup rusak atau tidak lengkap | Proses pemulihan data dapat gagal | Memeriksa checksum, memeriksa isi backup, dan melakukan uji restore |
+| File secret atau backup masuk ke repositori Git | Kredensial atau data sensitif dapat tersebar | Menggunakan `.gitignore`, memeriksa status Git sebelum commit, dan membatasi akses repositori |
+
+### 5.2.3 Evaluasi Keamanan
+
+Berdasarkan identifikasi ancaman, beberapa langkah pengamanan telah diterapkan dalam praktikum. Port PostgreSQL tidak dipublikasikan ke host, akses pgAdmin dibatasi pada alamat loopback, password PostgreSQL dipisahkan dari file konfigurasi utama, dan proses backup serta restore telah diuji.
+
+Namun, masih terdapat keterbatasan yang perlu diperhatikan. Password pgAdmin masih ditulis secara langsung pada `compose.yaml`, sehingga berisiko terungkap apabila file konfigurasi dibagikan atau dimasukkan ke repositori yang dapat diakses pihak lain. Selain itu, `.gitignore` tidak menghapus file yang sudah terlanjur dilacak oleh Git dan tidak mencegah akses langsung ke file pada filesystem.
+
+Untuk penggunaan produksi, pengamanan dapat ditingkatkan melalui pengelolaan kredensial yang lebih aman, pembatasan hak akses pengguna database, pemantauan log, pembaruan image secara teratur, serta penyimpanan backup pada lokasi terpisah dengan akses terbatas. Pengujian pemulihan juga perlu dilakukan secara berkala untuk memastikan backup dapat digunakan ketika terjadi kegagalan.
+
+# 6. Evaluasi dan Latihan Mandiri
+
+## 6.1 Mengapa init script tidak dijalankan ulang saat volume lama masih ada?
+
+Init script yang ditempatkan pada direktori `/docker-entrypoint-initdb.d` dijalankan ketika PostgreSQL pertama kali melakukan inisialisasi pada direktori data yang masih kosong. Apabila volume `pg-data` sudah berisi database yang pernah dibuat, PostgreSQL akan menggunakan data tersebut tanpa menjalankan ulang init script. Hal ini mencegah proses inisialisasi mengulang pembuatan tabel dan memasukkan data yang sama.
+
+## 6.2 Apa risiko menaruh password database pada `docker-compose.yml`?
+
+Password yang ditulis langsung pada file konfigurasi berisiko diketahui pihak lain ketika file dibagikan, dimasukkan ke repositori Git, atau diakses oleh pihak yang tidak berwenang. Untuk mengurangi risiko tersebut, password PostgreSQL pada praktikum ini disimpan dalam file terpisah dan diakses melalui Docker secrets. File password juga diberi izin akses terbatas dan direktori `secrets/` dimasukkan ke `.gitignore`.
+
+Namun, Docker secrets dalam konfigurasi Compose lokal tidak otomatis memberikan seluruh perlindungan yang tersedia pada pengelola secret di lingkungan orkestrasi produksi. Oleh karena itu, izin akses file dan keamanan host tetap perlu diperhatikan.
+
+## 6.3 Bagaimana cara membuktikan backup dapat dipulihkan?
+
+Backup dapat diperiksa menggunakan `pg_restore --list` untuk melihat objek database yang tersimpan di dalamnya. Integritas file juga dapat diperiksa menggunakan perintah `sha256sum --check`. Akan tetapi, kedua pemeriksaan tersebut belum cukup untuk membuktikan bahwa seluruh data dapat dipulihkan dengan benar.
+
+Pembuktian yang lebih kuat dilakukan dengan memulihkan backup ke database terpisah, kemudian menjalankan query untuk memeriksa struktur tabel dan data hasil pemulihan. Pada praktikum ini, database `labdb_restore` digunakan agar proses pengujian tidak mengubah database utama `labdb`.
+
+## 6.4 Apa perbedaan logical backup menggunakan `pg_dump` dan backup filesystem volume secara langsung?
+
+Logical backup menggunakan `pg_dump` menyimpan struktur dan data database dalam format yang dapat diproses oleh PostgreSQL. Metode ini memudahkan pemindahan dan pemulihan objek database secara terpilih. Format custom yang digunakan pada praktikum dapat diperiksa dan dipulihkan menggunakan utilitas `pg_restore`.
+
+Sementara itu, backup filesystem volume menyalin berkas fisik yang digunakan PostgreSQL untuk menyimpan database. Metode ini harus memperhatikan konsistensi data, misalnya melalui penghentian database secara aman atau mekanisme snapshot yang sesuai. Backup fisik juga lebih bergantung pada versi PostgreSQL, struktur penyimpanan, dan prosedur pemulihan yang digunakan.
+
+## 6.5 Apa dampak menjalankan `docker compose down -v` terhadap database?
+
+Perintah `docker compose down -v` menghentikan dan menghapus container serta menghapus volume yang dikelola oleh konfigurasi Compose sesuai cakupan perintah tersebut. Apabila volume `pg-data` ikut dihapus, data PostgreSQL yang tersimpan di dalamnya juga dapat hilang. Volume `pgadmin-data` yang menyimpan data pgAdmin juga dapat terhapus.
+
+Berbeda dengan `docker compose down` tanpa opsi `-v`, volume biasanya tetap dipertahankan. Oleh karena itu, penggunaan opsi `-v` harus dilakukan dengan hati-hati, terutama jika database masih menyimpan data yang dibutuhkan.
+
+
+# 7. Kesimpulan
+
+Berdasarkan praktikum yang telah dilakukan, PostgreSQL berhasil dijalankan menggunakan Docker Compose dan dikelola melalui pgAdmin. Database `labdb` beserta tabel `students` berhasil dibuat, dan data dapat diperiksa melalui terminal maupun antarmuka pgAdmin. Penggunaan named volume memungkinkan data tetap tersimpan secara terpisah dari siklus hidup container.
+
+Dari sisi keamanan, port PostgreSQL tidak dipublikasikan langsung ke host, akses pgAdmin dibatasi pada alamat loopback, dan password PostgreSQL dikelola menggunakan file secret. Praktikum juga menunjukkan pentingnya memeriksa konfigurasi serta menghindari penyimpanan kredensial secara langsung pada file yang berpotensi dibagikan.
+
+Proses backup menggunakan `pg_dump` berhasil dilakukan. File backup dapat diperiksa menggunakan `pg_restore --list`, diverifikasi dengan checksum SHA-256, dan dipulihkan ke database terpisah menggunakan `pg_restore`. Hasil pengujian menunjukkan bahwa data dapat dipulihkan tanpa mengganti database utama.
+
+Melalui praktikum ini, dapat dipahami bahwa pengelolaan database dalam container tidak hanya mencakup menjalankan layanan, tetapi juga memperhatikan keamanan kredensial, persistensi data, konfigurasi jaringan, serta kesiapan proses backup dan restore. Langkah-langkah tersebut menjadi dasar penting dalam membangun layanan database yang lebih terstruktur dan dapat dipulihkan ketika terjadi masalah.
+
+# 8. Penggunaan AI
+
+Dalam pelaksanaan praktikum ini, AI digunakan sebagai alat bantu untuk memahami fungsi perintah Docker dan PostgreSQL, menjelaskan konfigurasi layanan, membantu menganalisis kesalahan saat menjalankan perintah, serta menyusun dan merapikan penjelasan dalam laporan.
+
+AI juga membantu menjelaskan konsep penyimpanan persisten, pengelolaan kredensial, backup, restore, dan identifikasi ancaman keamanan. Sementara itu, perintah praktikum dijalankan dan hasilnya diperiksa melalui terminal Ubuntu dan antarmuka pgAdmin.
+
+Hasil yang dicantumkan dalam laporan disesuaikan dengan keluaran pengujian yang diperoleh selama praktikum. Dengan demikian, AI digunakan sebagai pendamping pembelajaran dan penyusunan laporan, sedangkan pelaksanaan serta verifikasi hasil tetap dilakukan melalui lingkungan praktikum.
+
+
 
