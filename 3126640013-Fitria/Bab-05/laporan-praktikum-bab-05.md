@@ -191,3 +191,41 @@ Hasil yang dibuktikan:
 - File backup berhasil dipulihkan ke database tujuan.
 - Data hasil pemulihan berjumlah tiga baris dan sesuai dengan data pada database utama.
 - Database utama `labdb` tetap dapat digunakan setelah pengujian restore.
+
+## 4.11 Pemeriksaan Integritas File Backup
+
+Pemeriksaan integritas dilakukan untuk memastikan file backup tidak mengalami perubahan atau kerusakan sejak checksum dibuat. Pada praktikum ini, pemeriksaan menggunakan algoritma SHA-256 melalui perintah `sha256sum --check`.
+
+Perintah yang digunakan:
+
+```bash
+sha256sum --check backup/*.sha256
+```
+
+![Hasil pemeriksaan checksum backup](./assets/ss-21.jpg)
+**Gambar 11. Hasil Pemeriksaan Integritas File Backup**
+
+Pemeriksaan checksum hanya memastikan kesesuaian file dengan checksum yang tersedia. Pemeriksaan ini tidak membuktikan bahwa seluruh isi backup pasti dapat dipulihkan. Oleh karena itu, pengujian juga dilakukan menggunakan `pg_restore` dan pemulihan ke database `labdb_restore`.
+
+## 4.12 Evaluasi dan Latihan Mandiri
+
+### 1. Mengapa init script tidak dijalankan ulang saat volume lama masih ada?
+
+Init script pada direktori `/docker-entrypoint-initdb.d` dijalankan ketika PostgreSQL pertama kali melakukan inisialisasi pada direktori data yang masih kosong. Jika volume `pg-data` sudah berisi database yang pernah dibuat, container akan menggunakan data tersebut tanpa menjalankan ulang init script. Hal ini mencegah proses inisialisasi mengulang pembuatan tabel dan memasukkan data yang sama.
+
+### 2. Apa risiko menaruh password database pada `docker-compose.yml`?
+
+Password yang ditulis langsung pada file konfigurasi berisiko terbaca oleh orang lain, terutama jika file dimasukkan ke repositori Git atau dibagikan tanpa pengamanan. Untuk mengurangi risiko tersebut, praktikum ini menyimpan password PostgreSQL di file terpisah pada direktori `secrets/`, kemudian mengabaikan direktori tersebut melalui `.gitignore`. File password juga diberi izin akses terbatas.
+
+### 3. Bagaimana cara membuktikan backup dapat dipulihkan?
+
+Backup dapat diperiksa terlebih dahulu menggunakan `pg_restore --list` untuk melihat objek yang tersimpan di dalamnya. Integritas file juga dapat diperiksa menggunakan `sha256sum --check`. Namun, pembuktian yang lebih kuat adalah melakukan restore ke database terpisah, kemudian menjalankan query untuk memastikan struktur tabel dan data berhasil dipulihkan. Pada praktikum ini, database `labdb_restore` digunakan untuk melakukan pengujian tersebut.
+
+### 4. Apa perbedaan logical backup menggunakan `pg_dump` dan backup filesystem volume secara langsung?
+
+Logical backup menggunakan `pg_dump` menyimpan struktur dan data database dalam format yang dapat diproses oleh PostgreSQL. Backup ini lebih mudah dipindahkan dan dipulihkan ke database tujuan. Sementara itu, backup filesystem volume menyalin berkas fisik yang digunakan PostgreSQL untuk menyimpan database. Cara tersebut perlu memperhatikan konsistensi data, misalnya dengan menghentikan database secara aman atau menggunakan mekanisme snapshot yang sesuai. Backup fisik juga lebih bergantung pada versi dan kondisi penyimpanan PostgreSQL.
+
+### 5. Apa dampak menjalankan `docker compose down -v` terhadap database?
+
+Perintah `docker compose down -v` menghentikan dan menghapus container beserta volume yang dikelola oleh konfigurasi Compose. Jika volume `pg-data` ikut dihapus, data PostgreSQL yang tersimpan di dalamnya juga dapat hilang. Volume `pgadmin-data` juga dapat terhapus. Berbeda dengan perintah `docker compose down` tanpa opsi `-v`, volume biasanya tetap dipertahankan sehingga data masih dapat digunakan ketika container dijalankan kembali.
+
