@@ -70,6 +70,6 @@ docker compose ps
 
 Berdasarkan hasil pemeriksaan, container PostgreSQL berada dalam status `healthy`, sedangkan container pgAdmin berada dalam status `Up`. Status tersebut menunjukkan bahwa kedua layanan telah berjalan dan PostgreSQL berhasil melewati pemeriksaan kesehatan container.
 
-![Status container PostgreSQL dan pgAdmin](./assets/SS-01.jpg)
+![Status container PostgreSQL dan pgAdmin](./assets/ss-07.jpg)
 
 **Gambar 1. Status container PostgreSQL dan pgAdmin.**
