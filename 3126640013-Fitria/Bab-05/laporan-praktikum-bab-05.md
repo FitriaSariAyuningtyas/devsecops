@@ -307,5 +307,17 @@ AI juga membantu menjelaskan konsep penyimpanan persisten, pengelolaan kredensia
 
 Hasil yang dicantumkan dalam laporan disesuaikan dengan keluaran pengujian yang diperoleh selama praktikum. Dengan demikian, AI digunakan sebagai pendamping pembelajaran dan penyusunan laporan, sedangkan pelaksanaan serta verifikasi hasil tetap dilakukan melalui lingkungan praktikum.
 
+# 9. Referensi
 
+Docker, Inc. (t.t.). *Manage secrets securely in Docker Compose*. Docker Documentation. Diakses 10 Oktober 2026, dari https://docs.docker.com/compose/how-tos/use-secrets/
+
+Docker, Inc. (t.t.). *Volumes*. Docker Documentation. Diakses 10 Oktober 2026, dari https://docs.docker.com/engine/storage/volumes/
+
+pgAdmin Development Team. (t.t.). *Container Deployment*. pgAdmin 4 Documentation. Diakses 10 Oktober 2026, dari https://www.pgadmin.org/docs/pgadmin4/latest/container_deployment.html
+
+The PostgreSQL Global Development Group. (t.t.). *PostgreSQL 16 Documentation: pg_dump*. Diakses 10 Oktober 2026, dari https://www.postgresql.org/docs/16/app-pgdump.html
+
+The PostgreSQL Global Development Group. (t.t.). *PostgreSQL 16 Documentation: pg_restore*. Diakses 10 Oktober 2026, dari https://www.postgresql.org/docs/16/app-pgrestore.html
+
+The PostgreSQL Global Development Group. (t.t.). *PostgreSQL 16 Documentation: Backup and Restore*. Diakses 10 Oktober 2026, dari https://www.postgresql.org/docs/16/backup.html
 
