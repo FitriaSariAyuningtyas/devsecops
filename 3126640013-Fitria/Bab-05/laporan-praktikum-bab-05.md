@@ -15,29 +15,29 @@ Selain itu, praktikum ini mencakup pengelolaan password database menggunakan Doc
 
 ## 2. Dasar Teori
 
-### 2.1 PostgreSQL
-
-PostgreSQL merupakan sistem manajemen basis data relasional yang digunakan untuk menyimpan dan mengelola data. Pada praktikum ini, PostgreSQL digunakan untuk menyimpan data mahasiswa dalam tabel `students`. Data tersebut kemudian diperiksa menggunakan perintah SQL melalui terminal dan pgAdmin.
-
-### 2.2 Docker Compose
-
-Docker Compose digunakan untuk mengatur beberapa layanan container melalui satu file konfigurasi. Pada praktikum ini, Docker Compose digunakan untuk menjalankan PostgreSQL dan pgAdmin, mengatur jaringan komunikasi antarlayanan, menentukan volume penyimpanan, serta mengatur ketergantungan antara kedua layanan.
-
-### 2.3 Docker Volume
-
-Docker volume digunakan untuk menyimpan data di luar siklus hidup container. Dengan volume, data PostgreSQL dapat tetap tersedia ketika container dihentikan atau dibuat ulang, selama volume yang menyimpan data tersebut tidak dihapus.
-
-### 2.4 Docker Secrets
-
-Docker secrets digunakan untuk menyediakan informasi sensitif, seperti password database, kepada layanan yang membutuhkannya. Pada praktikum ini, password PostgreSQL disimpan dalam file terpisah dan diberikan kepada container melalui `/run/secrets/postgres_password`. Dengan cara ini, password PostgreSQL tidak perlu ditulis langsung sebagai nilai `POSTGRES_PASSWORD` di file Compose.
-
-Penggunaan secrets melalui file pada Docker Compose lokal membantu memisahkan password dari konfigurasi layanan. Namun, file rahasia tetap perlu dilindungi menggunakan pengaturan izin akses yang sesuai dan tidak boleh ikut diunggah ke repository publik.
-
-### 2.5 Backup dan Restore Database
-
-Backup merupakan proses membuat salinan data database agar dapat digunakan kembali apabila terjadi kehilangan atau kerusakan data. Pada praktikum ini, backup dilakukan menggunakan `pg_dump` dengan format custom. File backup kemudian diperiksa menggunakan checksum SHA-256.
-
-Restore merupakan proses mengembalikan data dari file backup ke database. Pada praktikum ini, proses restore dilakukan menggunakan `pg_restore` pada database pengujian terpisah. Cara tersebut digunakan untuk memeriksa apakah data dapat dipulihkan tanpa mengubah database utama.
+  ### 2.1 PostgreSQL
+  
+  PostgreSQL merupakan sistem manajemen basis data relasional yang digunakan untuk menyimpan dan mengelola data. Pada praktikum ini, PostgreSQL digunakan untuk menyimpan data mahasiswa dalam tabel `students`. Data tersebut kemudian diperiksa menggunakan perintah SQL melalui terminal dan pgAdmin.
+  
+  ### 2.2 Docker Compose
+  
+  Docker Compose digunakan untuk mengatur beberapa layanan container melalui satu file konfigurasi. Pada praktikum ini, Docker Compose digunakan untuk menjalankan PostgreSQL dan pgAdmin, mengatur jaringan komunikasi antarlayanan, menentukan volume penyimpanan, serta mengatur ketergantungan antara kedua layanan.
+  
+  ### 2.3 Docker Volume
+  
+  Docker volume digunakan untuk menyimpan data di luar siklus hidup container. Dengan volume, data PostgreSQL dapat tetap tersedia ketika container dihentikan atau dibuat ulang, selama volume yang menyimpan data tersebut tidak dihapus.
+  
+  ### 2.4 Docker Secrets
+  
+  Docker secrets digunakan untuk menyediakan informasi sensitif, seperti password database, kepada layanan yang membutuhkannya. Pada praktikum ini, password PostgreSQL disimpan dalam file terpisah dan diberikan kepada container melalui `/run/secrets/postgres_password`. Dengan cara ini, password PostgreSQL tidak perlu ditulis langsung sebagai nilai `POSTGRES_PASSWORD` di file Compose.
+  
+  Penggunaan secrets melalui file pada Docker Compose lokal membantu memisahkan password dari konfigurasi layanan. Namun, file rahasia tetap perlu dilindungi menggunakan pengaturan izin akses yang sesuai dan tidak boleh ikut diunggah ke repository publik.
+  
+  ### 2.5 Backup dan Restore Database
+  
+  Backup merupakan proses membuat salinan data database agar dapat digunakan kembali apabila terjadi kehilangan atau kerusakan data. Pada praktikum ini, backup dilakukan menggunakan `pg_dump` dengan format custom. File backup kemudian diperiksa menggunakan checksum SHA-256.
+  
+  Restore merupakan proses mengembalikan data dari file backup ke database. Pada praktikum ini, proses restore dilakukan menggunakan `pg_restore` pada database pengujian terpisah. Cara tersebut digunakan untuk memeriksa apakah data dapat dipulihkan tanpa mengubah database utama.
 
 ## 3. Alat dan Bahan
 
