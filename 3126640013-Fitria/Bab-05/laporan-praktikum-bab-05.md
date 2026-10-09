@@ -71,5 +71,62 @@ docker compose ps
 Berdasarkan hasil pemeriksaan, container PostgreSQL berada dalam status `healthy`, sedangkan container pgAdmin berada dalam status `Up`. Status tersebut menunjukkan bahwa kedua layanan telah berjalan dan PostgreSQL berhasil melewati pemeriksaan kesehatan container.
 
 ![Status container PostgreSQL dan pgAdmin](./assets/ss-07.jpg)
-
 **Gambar 1. Status container PostgreSQL dan pgAdmin.**
+
+
+## 4.2 Pemeriksaan Log PostgreSQL
+
+Setelah memastikan container berjalan, dilakukan pemeriksaan log PostgreSQL untuk mengetahui apakah proses inisialisasi database berhasil dijalankan. Pemeriksaan dilakukan menggunakan perintah berikut:
+
+```bash
+docker compose logs postgres-db
+```
+
+Berdasarkan hasil pemeriksaan, PostgreSQL berhasil menjalankan proses inisialisasi database dan menyelesaikan proses startup. Log menunjukkan bahwa server telah siap menerima koneksi sehingga database dapat digunakan untuk pengujian selanjutnya.
+
+![Log PostgreSQL](./assets/ss-08.jpg)
+**Gambar 7. Hasil pemeriksaan log PostgreSQL.**
+
+## 4.3 Akses pgAdmin melalui Browser
+
+Pengujian selanjutnya dilakukan dengan mengakses pgAdmin melalui browser pada alamat `http://localhost:5050`. pgAdmin digunakan untuk mempermudah pengelolaan database melalui antarmuka grafis tanpa harus selalu menjalankan perintah SQL melalui terminal.
+
+Setelah berhasil login, halaman utama pgAdmin ditampilkan. Server PostgreSQL yang digunakan pada praktikum ini terhubung melalui hostname `postgres-db` dan port `5432`. Hostname tersebut dapat digunakan karena kedua layanan berada pada jaringan internal Docker yang sama.
+
+![Dashboard pgAdmin](./assets/ss-09.jpg)
+**Gambar 8. Tampilan dashboard pgAdmin.**
+
+Hasil yang dibuktikan:
+
+- Halaman pgAdmin berhasil dibuka melalui browser.
+- Pengguna berhasil masuk ke dashboard pgAdmin.
+- pgAdmin siap digunakan untuk mengakses dan mengelola database.
+
+## 4.4 Pengujian Data Mahasiswa melalui Terminal
+
+Pengujian berikutnya dilakukan dengan menjalankan query SQL untuk menampilkan data mahasiswa yang tersimpan pada database `labdb`. Perintah berikut dijalankan melalui terminal:
+
+```bash
+docker compose exec postgres-db psql -U labuser -d labdb -c "SELECT id, nrp, name FROM students ORDER BY id;"
+```
+
+Perintah tersebut menjalankan `psql` di dalam container PostgreSQL dan menampilkan kolom `id`, `nrp`, serta `name` dari tabel `students`. Data diurutkan berdasarkan `id` agar hasilnya ditampilkan secara berurutan.
+
+Berdasarkan hasil pengujian, terdapat tiga data mahasiswa yang berhasil ditampilkan. Dua data pertama berasal dari proses inisialisasi database, sedangkan data ketiga, yaitu Mahasiswa Uji, ditambahkan saat pengujian berlangsung.
+
+![Hasil query data mahasiswa melalui terminal](./assets/ss-10.jpg)
+**Gambar 9. Hasil query data mahasiswa melalui terminal.**
+
+
+Hasil yang dibuktikan:
+
+```text
+ id |   nrp    |      name
+----+----------+----------------
+  1 | 31230001 | Mahasiswa Satu
+  2 | 31230002 | Mahasiswa Dua
+  3 | 31230003 | Mahasiswa Uji
+(3 rows)
+```
+
+
