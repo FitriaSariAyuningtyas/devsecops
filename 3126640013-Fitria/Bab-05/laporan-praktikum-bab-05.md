@@ -55,3 +55,26 @@ Alat dan bahan yang digunakan dalam praktikum ini ditunjukkan pada tabel berikut
 | 8 | File `secrets/postgres_password.txt` | Menyimpan password PostgreSQL untuk digunakan sebagai Docker secret. |
 | 9 | File `scripts/backup.sh` | Menjalankan backup database dan membuat checksum SHA-256. |
 | 10 | Terminal dan browser | Menjalankan perintah Docker serta mengakses pgAdmin. |
+
+## 4. Langkah-Langkah Praktikum
+
+### 4.1 Persiapan Lingkungan Praktikum
+
+Praktikum dilakukan menggunakan Ubuntu yang berjalan pada WSL2. Docker Engine dan Docker Compose digunakan untuk menjalankan layanan PostgreSQL dan pgAdmin. Seluruh konfigurasi praktikum disimpan dalam direktori `~/docker-lab/bab-5`.
+
+Direktori praktikum terdiri atas beberapa folder, yaitu `init` untuk menyimpan SQL script inisialisasi database, `pgadmin` untuk konfigurasi pgAdmin, `scripts` untuk menyimpan script backup, `secrets` untuk menyimpan password PostgreSQL, dan `backup` untuk menyimpan hasil pencadangan database.
+
+Struktur direktori tersebut dibuat agar file konfigurasi, kredensial, script, dan hasil backup tersimpan secara terpisah.
+
+### 4.2 Konfigurasi Layanan Menggunakan Docker Compose
+
+Konfigurasi layanan dibuat dalam file `compose.yaml`. File tersebut digunakan untuk mendefinisikan layanan PostgreSQL dan pgAdmin beserta pengaturan jaringan, volume, password, dan pemeriksaan kesehatan container.
+
+Layanan PostgreSQL menggunakan image `postgres:16-alpine`, sedangkan pgAdmin digunakan sebagai antarmuka berbasis web untuk mengelola database. Kedua layanan dihubungkan melalui jaringan internal Docker bernama `data-net`.
+
+PostgreSQL menggunakan named volume `pg-data` untuk menyimpan data database, sedangkan pgAdmin menggunakan volume `pgadmin-data` untuk menyimpan data konfigurasinya. Dengan demikian, penyimpanan data dipisahkan dari siklus hidup container.
+
+Setelah konfigurasi selesai, perintah berikut dijalankan untuk memeriksa layanan yang terdefinisi:
+
+```bash
+docker compose config --services
