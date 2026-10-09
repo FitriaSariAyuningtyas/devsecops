@@ -85,7 +85,7 @@ docker compose logs postgres-db
 Berdasarkan hasil pemeriksaan, PostgreSQL berhasil menjalankan proses inisialisasi database dan menyelesaikan proses startup. Log menunjukkan bahwa server telah siap menerima koneksi sehingga database dapat digunakan untuk pengujian selanjutnya.
 
 ![Log PostgreSQL](./assets/ss-08.jpg)
-**Gambar 7. Hasil pemeriksaan log PostgreSQL.**
+**Gambar 2. Hasil pemeriksaan log PostgreSQL.**
 
 ## 4.3 Akses pgAdmin melalui Browser
 
@@ -94,13 +94,8 @@ Pengujian selanjutnya dilakukan dengan mengakses pgAdmin melalui browser pada al
 Setelah berhasil login, halaman utama pgAdmin ditampilkan. Server PostgreSQL yang digunakan pada praktikum ini terhubung melalui hostname `postgres-db` dan port `5432`. Hostname tersebut dapat digunakan karena kedua layanan berada pada jaringan internal Docker yang sama.
 
 ![Dashboard pgAdmin](./assets/ss-09.jpg)
-**Gambar 8. Tampilan dashboard pgAdmin.**
+**Gambar 3. Tampilan dashboard pgAdmin.**
 
-Hasil yang dibuktikan:
-
-- Halaman pgAdmin berhasil dibuka melalui browser.
-- Pengguna berhasil masuk ke dashboard pgAdmin.
-- pgAdmin siap digunakan untuk mengakses dan mengelola database.
 
 ## 4.4 Pengujian Data Mahasiswa melalui Terminal
 
@@ -115,18 +110,47 @@ Perintah tersebut menjalankan `psql` di dalam container PostgreSQL dan menampilk
 Berdasarkan hasil pengujian, terdapat tiga data mahasiswa yang berhasil ditampilkan. Dua data pertama berasal dari proses inisialisasi database, sedangkan data ketiga, yaitu Mahasiswa Uji, ditambahkan saat pengujian berlangsung.
 
 ![Hasil query data mahasiswa melalui terminal](./assets/ss-10.jpg)
-**Gambar 9. Hasil query data mahasiswa melalui terminal.**
+**Gambar 4. Hasil query data mahasiswa melalui terminal.**
 
 
-Hasil yang dibuktikan:
+## 4.5 Pengujian Data Mahasiswa melalui pgAdmin
 
-```text
- id |   nrp    |      name
-----+----------+----------------
-  1 | 31230001 | Mahasiswa Satu
-  2 | 31230002 | Mahasiswa Dua
-  3 | 31230003 | Mahasiswa Uji
-(3 rows)
+Setelah pengujian melalui terminal berhasil dilakukan, pengujian dilanjutkan melalui pgAdmin untuk memastikan data mahasiswa dapat diakses melalui antarmuka berbasis web. pgAdmin dibuka melalui browser pada alamat `http://localhost:5050`.
+
+Setelah masuk ke pgAdmin, database `labdb` dipilih dan query dijalankan untuk menampilkan isi tabel `students`. Hasil pengujian menunjukkan tiga data mahasiswa yang sama dengan hasil query melalui terminal, yaitu Mahasiswa Satu, Mahasiswa Dua, dan Mahasiswa Uji.
+
+![Hasil query data mahasiswa melalui pgAdmin](./assets/ss-17.jpg)
+**Gambar 5. Hasil query data mahasiswa melalui pgAdmin.**
+
+
+## 4.6 Pemeriksaan Publikasi Port PostgreSQL
+
+Pemeriksaan port dilakukan untuk memastikan PostgreSQL tidak dipublikasikan secara langsung ke host. Pemeriksaan ini penting karena layanan database sebaiknya hanya dapat diakses oleh layanan yang memang membutuhkan koneksi, sesuai dengan konfigurasi jaringan yang digunakan.
+
+Pemeriksaan dilakukan menggunakan perintah berikut:
+
+```bash
+docker inspect bab-5-postgres-db-1 --format '{{json .NetworkSettings.Ports}}'
 ```
 
+Berdasarkan hasil pemeriksaan, port `5432/tcp` tidak memiliki pemetaan port ke host. Artinya, PostgreSQL tidak dipublikasikan melalui port host, sedangkan pgAdmin tetap dapat mengaksesnya melalui jaringan internal Docker.
 
+![Pemeriksaan port PostgreSQL](./assets/ss-18.jpg)
+**Gambar 6. Hasil pemeriksaan publikasi port PostgreSQL.**
+
+
+## 4.7 Pengamanan Password dan Pemeriksaan `.gitignore`
+
+Password PostgreSQL disimpan dalam file `secrets/postgres_password.txt` dan diberikan kepada container melalui Docker secret. File tersebut memiliki permission `600`, sehingga hanya pemilik file yang memiliki izin baca dan tulis.
+
+Untuk mencegah file rahasia ikut dimasukkan ke repository Git, folder `secrets/` ditambahkan ke file `.gitignore`. Pemeriksaan dilakukan menggunakan perintah berikut:
+
+```bash
+ls -l secrets/postgres_password.txt
+git check-ignore -v secrets/postgres_password.txt
+```
+
+Hasil pemeriksaan menunjukkan bahwa file password memiliki permission terbatas dan cocok dengan aturan `secrets/` pada `.gitignore`. Dengan demikian, file password diabaikan oleh Git sesuai dengan konfigurasi yang dibuat.
+
+![Pemeriksaan permission dan gitignore](./assets/ss-19.jpg)
+**Gambar 12. Pemeriksaan permission file password dan aturan `.gitignore`.**
