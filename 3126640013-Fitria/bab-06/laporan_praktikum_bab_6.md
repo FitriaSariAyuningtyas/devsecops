@@ -418,7 +418,7 @@ Dengan skrip ini, struktur database PostgreSQL dapat disiapkan secara otomatis u
 
 **Dokumentasi konfigurasi:**
 
-![Inisialisasi Database PostgreSQL](ssets/bab6-13-inisialisasi-database-postgresql.png)
+![Inisialisasi Database PostgreSQL](assets/bab6-13-inisialisasi-database-postgresql.png)
 *Gambar 5.6 Tampilan Skrip Inisialisasi Database PostgreSQL pada File `01-init-logging.sh`.*
 
 
