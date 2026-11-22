@@ -10,7 +10,7 @@
 
 **NIM:** 3126640013
 
-**Kelas:** STr LJ Teknik Informatika A
+**Kelas:** STr LJ Teknik Informatika B
 
 
 ---
