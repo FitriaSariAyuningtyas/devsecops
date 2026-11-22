@@ -616,7 +616,7 @@ Hasil pemeriksaan menunjukkan bahwa container PostgreSQL berjalan dengan status 
 
 Berikut dokumentasi hasil pemeriksaan container:
 
-![Status Container Docker](evidence/bab6-01-status-container.png)
+![Status Container Docker](assets/bab6-01-status-container.png)
 
 *Gambar 6.1 Hasil Pemeriksaan Status Container Docker pada Praktikum Bab 6.*
 
