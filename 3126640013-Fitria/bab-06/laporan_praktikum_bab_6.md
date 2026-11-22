@@ -358,3 +358,61 @@ Melalui skrip tersebut, nilai token yang telah ditentukan tidak ditampilkan dala
 ![Konfigurasi Redact Lua](assets/bab6-12-konfigurasi-redact-lua.png)
 *Gambar 5.5 Tampilan Konfigurasi Skrip Penyamaran Data pada File `redact.lua`.*
 
+
+### 5.6 Inisialisasi Database PostgreSQL (`01-init-logging.sh`)
+
+File `01-init-logging.sh` merupakan skrip yang digunakan untuk melakukan inisialisasi database PostgreSQL secara otomatis ketika container PostgreSQL pertama kali dibuat dengan direktori data yang masih kosong.
+
+Skrip ini membuat role khusus untuk Fluent Bit, schema `logs`, tabel `fluentbit`, indeks untuk membantu pencarian data, serta view `recent_logs`.
+
+Berikut isi skrip `01-init-logging.sh`:
+
+```bash
+#!/bin/sh
+set -eu
+
+psql --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<EOSQL
+CREATE ROLE fluentbit_user
+    WITH LOGIN PASSWORD '${FLUENTBIT_DB_PASSWORD}';
+
+CREATE SCHEMA logs;
+
+CREATE TABLE logs.fluentbit (
+    tag TEXT,
+    time TIMESTAMP WITHOUT TIME ZONE,
+    data JSONB
+);
+
+CREATE INDEX idx_fluentbit_time
+    ON logs.fluentbit (time);
+
+CREATE INDEX idx_fluentbit_tag
+    ON logs.fluentbit (tag);
+
+CREATE INDEX idx_fluentbit_data
+    ON logs.fluentbit USING GIN (data);
+
+CREATE VIEW logs.recent_logs AS
+    SELECT tag, time, data
+    FROM logs.fluentbit
+    ORDER BY time DESC;
+
+ALTER ROLE fluentbit_user SET search_path TO logs, public;
+
+GRANT USAGE ON SCHEMA logs TO fluentbit_user;
+GRANT INSERT, SELECT ON logs.fluentbit TO fluentbit_user;
+GRANT SELECT ON logs.recent_logs TO fluentbit_user;
+EOSQL
+```
+
+Penjelasan skrip:
+
+1. **Pembuatan Role:** Membuat pengguna database `fluentbit_user` yang digunakan oleh Fluent Bit untuk mengakses PostgreSQL.
+2. **Pembuatan Schema:** Membuat schema `logs` sebagai tempat penyimpanan data log.
+3. **Pembuatan Tabel:** Membuat tabel `logs.fluentbit` dengan kolom `tag`, `time`, dan `data`. Kolom `data` menggunakan tipe JSONB untuk menyimpan informasi log dalam format JSON.
+4. **Pembuatan Indeks:** Membuat indeks pada kolom `time`, `tag`, dan `data` untuk membantu proses pencarian dan analisis log.
+5. **Pembuatan View:** Membuat view `logs.recent_logs` untuk menampilkan data log berdasarkan waktu terbaru.
+6. **Pemberian Hak Akses:** Memberikan hak akses kepada `fluentbit_user` untuk menggunakan schema, memasukkan data, serta membaca data log.
+
+Dengan skrip ini, struktur database PostgreSQL dapat disiapkan secara otomatis untuk mendukung proses penyimpanan dan analisis log dari Fluent Bit.
+
