@@ -116,7 +116,25 @@ Variabel `POSTGRES_DB`, `POSTGRES_USER`, dan `POSTGRES_PASSWORD` digunakan untuk
 *Gambar 5.1 Tampilan Konfigurasi Variabel Environment pada File `.env.example`.*
 
 
+### 5.2 Konfigurasi Git Ignore (`.gitignore`)
 
+File `.gitignore` digunakan untuk menentukan file dan direktori yang tidak perlu disertakan dalam pelacakan Git. Pada praktikum ini, file tersebut digunakan untuk mengabaikan file environment, file log, serta direktori laporan.
+
+Berikut isi konfigurasi `.gitignore`:
+
+```gitignore
+.env
+*.log
+reports/
+```
+
+Keterangan konfigurasi:
+
+1. `.env`: Mengabaikan file yang berisi variabel lingkungan dan kredensial konfigurasi.
+2. `*.log`: Mengabaikan seluruh file dengan ekstensi `.log`.
+3. `reports/`: Mengabaikan direktori `reports` beserta isinya.
+
+Dengan konfigurasi tersebut, file dan direktori yang telah ditentukan tidak akan disertakan dalam pelacakan Git.
 
 ### 5.3 Konfigurasi Docker Compose (`compose.yaml`)
 
