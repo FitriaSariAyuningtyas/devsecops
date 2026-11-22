@@ -266,3 +266,58 @@ Ketiga container generator menggunakan image Alpine dan menghasilkan log dalam f
 
 Secara keseluruhan, Docker Compose menghubungkan container generator, Fluent Bit, dan PostgreSQL sehingga proses pengumpulan, pemrosesan, serta penyimpanan log dapat dilakukan secara terpusat.
 
+
+### 5.4 Konfigurasi Fluent Bit (`fluent-bit.conf`)
+
+File `fluent-bit.conf` digunakan untuk mengatur proses pengumpulan, pemrosesan, dan pengiriman log dari container Docker ke PostgreSQL. Konfigurasi ini terdiri dari bagian service, input, filter, dan output.
+
+Berikut isi konfigurasi `fluent-bit.conf`:
+
+```ini
+[SERVICE]
+    Flush           1
+    Log_Level       info
+    HTTP_Server     On
+    HTTP_Listen     0.0.0.0
+    HTTP_Port       2020
+    storage.path    /var/log/flb-storage
+
+[INPUT]
+    Name            forward
+    Listen          0.0.0.0
+    Port            24224
+    storage.type    filesystem
+
+[FILTER]
+    Name            lua
+    Match           docker.bab-6-generator-api-1
+    Script          /fluent-bit/etc/redact.lua
+    Call            redact
+
+[OUTPUT]
+    Name            pgsql
+    Match           *
+    Host            postgres-db
+    Port            5432
+    Database        ${POSTGRES_DB}
+    User            ${FLUENTBIT_DB_USER}
+    Password        ${FLUENTBIT_DB_PASSWORD}
+    Table           fluentbit
+    Retry_Limit     False
+
+[OUTPUT]
+    Name            stdout
+    Match           *
+```
+
+Penjelasan konfigurasi:
+
+1. **Service:** Mengatur interval pengiriman log setiap satu detik, tingkat pencatatan informasi, HTTP server untuk pemantauan, serta lokasi penyimpanan buffer berbasis filesystem.
+2. **Input:** Menggunakan plugin `forward` untuk menerima log dari container Docker melalui port `24224`.
+3. **Filter:** Menggunakan plugin Lua untuk menjalankan proses penyamaran data pada log dari container generator API.
+4. **Output PostgreSQL:** Mengirim seluruh log yang diterima ke database PostgreSQL pada tabel `fluentbit`.
+5. **Output stdout:** Menampilkan log pada standard output Fluent Bit untuk membantu pemantauan proses pengiriman log.
+
+Dengan konfigurasi tersebut, Fluent Bit dapat menerima log dari beberapa container, melakukan pemrosesan menggunakan filter Lua pada sumber log yang ditentukan, serta mengirimkan data log ke PostgreSQL.
+
+
