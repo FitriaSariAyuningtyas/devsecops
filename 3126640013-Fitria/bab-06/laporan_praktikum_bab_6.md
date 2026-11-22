@@ -321,3 +321,40 @@ Penjelasan konfigurasi:
 Dengan konfigurasi tersebut, Fluent Bit dapat menerima log dari beberapa container, melakukan pemrosesan menggunakan filter Lua pada sumber log yang ditentukan, serta mengirimkan data log ke PostgreSQL.
 
 
+### 5.5 Konfigurasi Lua untuk Penyamaran Data (`redact.lua`)
+
+File `redact.lua` digunakan sebagai skrip pemrosesan log dengan bahasa pemrograman Lua. Skrip ini berfungsi untuk menyamarkan nilai token tertentu pada log yang diterima dari container generator API.
+
+Berikut isi konfigurasi `redact.lua`:
+
+```lua
+function redact(tag, timestamp, record)
+    local log = record["log"]
+
+    if type(log) == "string" then
+        record["log"] = string.gsub(
+            log,
+            "CANARY_BAB6_SECRET_2026",
+            "[REDACTED]"
+        )
+    end
+
+    return 1, timestamp, record
+end
+```
+
+Penjelasan skrip:
+
+1. `function redact(tag, timestamp, record)`: Mendefinisikan fungsi Lua yang menerima tag, waktu, dan data log.
+2. `local log = record["log"]`: Mengambil isi pesan log dari field `log`.
+3. `type(log) == "string"`: Memastikan nilai log berupa teks sebelum dilakukan pemrosesan.
+4. `string.gsub()`: Mengganti teks `CANARY_BAB6_SECRET_2026` dengan `[REDACTED]`.
+5. `return 1, timestamp, record`: Mengembalikan record yang telah diproses agar dapat diteruskan oleh Fluent Bit.
+
+Melalui skrip tersebut, nilai token yang telah ditentukan tidak ditampilkan dalam bentuk aslinya pada pesan log yang diproses. Proses penyamaran ini membantu mengurangi risiko tereksposnya informasi sensitif dalam penyimpanan log.
+
+**Dokumentasi konfigurasi:**
+
+![Konfigurasi Redact Lua](assets/bab6-12-konfigurasi-redact-lua.png)
+*Gambar 5.5 Tampilan Konfigurasi Skrip Penyamaran Data pada File `redact.lua`.*
+
