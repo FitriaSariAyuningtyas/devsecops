@@ -68,11 +68,12 @@ Keterangan direktori dan file:
 - `queries/`: Menyimpan query SQL untuk analisis data log.
 - `scripts/`: Menyimpan skrip otomatisasi pengujian buffering.
 
+
 ### 4.3 Konfigurasi Docker Compose (`compose.yaml`)
 
 File `compose.yaml` digunakan untuk mengatur dan menjalankan seluruh layanan yang dibutuhkan dalam praktikum Centralized Logging. Layanan yang digunakan terdiri dari PostgreSQL sebagai penyimpanan log, Fluent Bit sebagai pengumpul dan pengirim log, serta tiga container generator untuk menghasilkan log secara otomatis.
 
-Konfigurasi layanan PostgreSQL:
+**a. Konfigurasi layanan PostgreSQL**
 
 ```yaml
 services:
@@ -92,10 +93,13 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+```
 
-PostgreSQL menggunakan image postgres:16-alpine dan berfungsi sebagai tempat penyimpanan log. Data disimpan menggunakan Docker volume agar tetap tersedia meskipun container dihentikan atau dibuat ulang. Health check digunakan untuk memastikan PostgreSQL siap menerima koneksi.
+PostgreSQL menggunakan image `postgres:16-alpine` dan berfungsi sebagai tempat penyimpanan log. Data disimpan menggunakan Docker volume agar tetap tersedia meskipun container dihentikan atau dibuat ulang. Health check digunakan untuk memastikan PostgreSQL siap menerima koneksi.
 
-Konfigurasi layanan Fluent Bit:
+**b. Konfigurasi layanan Fluent Bit**
+
+```yaml
   fluent-bit:
     image: cr.fluentbit.io/fluent/fluent-bit:3.2
     container_name: bab6-fluent-bit
@@ -113,10 +117,13 @@ Konfigurasi layanan Fluent Bit:
       - fluentbit_storage:/var/log/flb-storage
       - ./fluent-bit/redact.lua:/fluent-bit/etc/redact.lua:ro
     command: ["--config", "/fluent-bit/etc/fluent-bit.conf"]
+```
 
-Fluent Bit bertugas menerima log dari container lain, melakukan pemrosesan sesuai konfigurasi, kemudian mengirimkannya ke PostgreSQL. Layanan ini dijalankan setelah PostgreSQL dinyatakan sehat. Volume fluentbit_storage digunakan untuk mendukung penyimpanan buffer berbasis filesystem.
+Fluent Bit bertugas menerima log dari container lain, melakukan pemrosesan sesuai konfigurasi, kemudian mengirimkannya ke PostgreSQL. Layanan ini dijalankan setelah PostgreSQL dinyatakan sehat. Volume `fluentbit_storage` digunakan untuk mendukung penyimpanan buffer berbasis filesystem.
 
-Konfigurasi container generator:
+**c. Konfigurasi container generator**
+
+```yaml
   generator-auth:
     image: alpine:3.20
     command:
@@ -183,8 +190,9 @@ Konfigurasi container generator:
 volumes:
   postgres_data:
   fluentbit_storage:
+```
 
-Ketiga container generator menggunakan image Alpine dan menghasilkan log dalam format JSON. Log dikirim menggunakan Docker logging driver fluentd menuju Fluent Bit melalui port 24224. Setiap generator menghasilkan 20 event dengan interval satu detik. Pada konfigurasi ini, generator menghasilkan event dengan severity INFO.
+Ketiga container generator menggunakan image Alpine dan menghasilkan log dalam format JSON. Log dikirim menggunakan Docker logging driver `fluentd` menuju Fluent Bit melalui port `24224`. Setiap generator menghasilkan 20 event dengan interval satu detik. Pada konfigurasi ini, generator menghasilkan event dengan severity `INFO`.
 
 Secara keseluruhan, Docker Compose menghubungkan container generator, Fluent Bit, dan PostgreSQL sehingga proses pengumpulan, pemrosesan, serta penyimpanan log dapat dilakukan secara terpusat.
 
