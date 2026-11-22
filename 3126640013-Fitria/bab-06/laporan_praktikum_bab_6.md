@@ -724,3 +724,158 @@ Beberapa risiko yang dapat terjadi antara lain:
 4. **Gangguan analisis:** Data log yang tidak terkumpul secara lengkap dapat memengaruhi proses analisis dan penelusuran kejadian.
 
 Untuk mengurangi risiko tersebut, diperlukan mekanisme buffering berbasis filesystem, pengaturan restart otomatis pada layanan Fluent Bit, serta pemantauan kondisi layanan secara berkala.
+
+### 7.2 Keunggulan Structured Logging dibandingkan Plain Text Logging
+
+Structured logging merupakan metode pencatatan log menggunakan format data terstruktur, seperti JSON. Setiap informasi log disimpan dalam field tertentu sehingga lebih mudah dibaca, dicari, dan dianalisis oleh sistem.
+
+Dibandingkan plain text logging, structured logging memiliki beberapa keunggulan, yaitu:
+
+1. **Mudah dianalisis:** Informasi log dipisahkan ke dalam field seperti waktu, severity, service, dan event sehingga dapat dianalisis secara lebih terarah.
+2. **Mempermudah pencarian:** Data dapat dicari berdasarkan nilai field tertentu tanpa harus memeriksa seluruh isi pesan secara manual.
+3. **Mendukung pengelompokan data:** Log dapat dikelompokkan berdasarkan service, severity, atau atribut lainnya.
+4. **Mudah diintegrasikan:** Format terstruktur lebih mudah diproses oleh sistem pengelolaan log dan alat analisis data.
+5. **Meningkatkan konsistensi:** Format pencatatan yang seragam memudahkan pengolahan log dari berbagai layanan aplikasi.
+
+Pada praktikum ini, structured logging diterapkan dengan menyimpan data log ke PostgreSQL menggunakan tipe data JSONB. Dengan demikian, informasi log dapat diakses dan dianalisis menggunakan query SQL serta operator JSONB.
+
+### 7.3 Kapan PostgreSQL Tidak Lagi Cocok sebagai Log Storage Utama?
+
+PostgreSQL dapat digunakan sebagai tempat penyimpanan log karena mendukung tipe data JSONB, query SQL, indeks, dan pengelolaan retensi. Namun, PostgreSQL tidak selalu menjadi pilihan yang paling efisien untuk menyimpan log dalam skala besar.
+
+PostgreSQL mulai kurang sesuai sebagai penyimpanan log utama apabila menghadapi beberapa kondisi berikut:
+
+1. **Volume log sangat tinggi:** Jumlah event yang masuk terus meningkat sehingga membebani proses penyimpanan dan pengolahan database.
+2. **Ingest log secara terus-menerus:** Aliran data yang sangat besar dapat menyebabkan beban penulisan database meningkat.
+3. **Retensi log jangka panjang:** Penyimpanan log dalam jumlah besar dan waktu yang lama membutuhkan kapasitas storage serta pengelolaan data yang lebih kompleks.
+4. **Pencarian teks dalam skala besar:** Pencarian log dengan volume tinggi dapat membutuhkan sumber daya database yang besar dan memengaruhi performa query.
+5. **Peningkatan kebutuhan sistem:** Ketika jumlah layanan dan pengguna bertambah, sistem penyimpanan khusus log dapat memberikan skalabilitas yang lebih sesuai.
+
+Sebagai alternatif, sistem seperti Loki, OpenSearch, dan ClickHouse dapat dipertimbangkan sesuai kebutuhan penyimpanan, pencarian, serta analisis log.
+
+Dengan demikian, PostgreSQL masih sesuai untuk kebutuhan praktikum dan sistem dengan volume log terbatas. Namun, untuk lingkungan produksi dengan volume log sangat besar, diperlukan evaluasi terhadap penggunaan sistem penyimpanan log yang lebih khusus.
+
+### 7.4 Perbedaan Log untuk Observability dan Forensik
+
+Log untuk observability dan log untuk forensik memiliki tujuan penggunaan yang berbeda, meskipun keduanya sama-sama digunakan untuk memperoleh informasi mengenai aktivitas sistem.
+
+Perbedaan keduanya dapat dijelaskan sebagai berikut:
+
+| Aspek | Log untuk Observability | Log untuk Forensik |
+|---|---|---|
+| Tujuan | Memantau kondisi dan kinerja sistem | Menelusuri kejadian atau insiden |
+| Fokus | Aktivitas aplikasi, error, latency, dan performa | Siapa melakukan apa, kapan, pada resource mana, dan hasilnya |
+| Penggunaan | Troubleshooting dan pemantauan operasional | Investigasi dan pengumpulan bukti |
+| Pengelolaan | Mendukung pencarian dan analisis secara cepat | Menjaga integritas dan keaslian bukti |
+| Akses | Digunakan oleh tim operasional | Akses lebih terbatas dan aktivitasnya diaudit |
+
+Log observability membantu tim pengembang dan operasional mengetahui kondisi aplikasi, menemukan kesalahan, serta memantau kinerja layanan. Sementara itu, log forensik digunakan untuk menelusuri kejadian secara lebih mendalam dan menyediakan bukti yang dapat dipertanggungjawabkan.
+
+Untuk mendukung kebutuhan forensik, log perlu memiliki pengaturan hak akses yang ketat, pencatatan aktivitas akses, serta perlindungan integritas data. Hasil ekspor log juga dapat dilengkapi checksum agar integritas file dapat diverifikasi.
+
+Dengan demikian, log observability lebih berorientasi pada pemantauan dan pemecahan masalah sistem, sedangkan log forensik lebih berorientasi pada investigasi dan pemeliharaan bukti kejadian.
+
+### 7.5 Query SQL Jumlah Log per Menit dalam 10 Menit Terakhir
+
+Query SQL digunakan untuk menghitung jumlah data log yang masuk ke PostgreSQL berdasarkan kelompok waktu per menit dalam rentang 10 menit terakhir.
+
+Berikut query SQL yang digunakan:
+
+```sql
+SELECT
+    date_trunc('minute', time) AS minute_bucket,
+    COUNT(*) AS total_log
+FROM logs.fluentbit
+WHERE time >= CURRENT_TIMESTAMP - INTERVAL '10 minutes'
+GROUP BY minute_bucket
+ORDER BY minute_bucket DESC;
+```
+
+Penjelasan query:
+
+1. `date_trunc('minute', time)`: Mengelompokkan waktu log berdasarkan menit.
+2. `COUNT(*) AS total_log`: Menghitung jumlah log pada setiap kelompok menit.
+3. `FROM logs.fluentbit`: Mengambil data dari tabel penyimpanan log PostgreSQL.
+4. `WHERE time >= CURRENT_TIMESTAMP - INTERVAL '10 minutes'`: Membatasi data yang dihitung hanya dalam rentang 10 menit terakhir.
+5. `GROUP BY minute_bucket`: Mengelompokkan data berdasarkan waktu per menit.
+6. `ORDER BY minute_bucket DESC`: Mengurutkan hasil dari menit terbaru ke menit terlama.
+
+Query tersebut menghasilkan jumlah log pada setiap menit dalam rentang waktu 10 menit terakhir. Hasilnya dapat digunakan untuk mengamati aktivitas penerimaan log pada sistem centralized logging.
+
+
+# 8. Analisis Masalah dan Rekomendasi
+
+## 8.1 Analisis Masalah yang Ditemukan
+
+Dalam penerapan centralized logging, salah satu kondisi yang perlu diperhatikan adalah ketika layanan PostgreSQL tidak tersedia sementara. Kondisi tersebut dapat menghambat proses pengiriman dan penyimpanan log dari Fluent Bit ke database.
+
+Untuk mengamati kondisi tersebut, dilakukan pengujian menggunakan skrip `test-buffering.sh`. Pengujian dilakukan dengan menghentikan PostgreSQL sementara, menjalankan kembali container generator, kemudian mengaktifkan PostgreSQL dan memeriksa jumlah record yang tersimpan.
+
+Hasil pengujian menunjukkan bahwa jumlah record meningkat dari 13.467 menjadi 13.527, atau bertambah sebanyak 60 record setelah PostgreSQL dipulihkan. Namun, hasil tersebut belum dapat memastikan bahwa seluruh log berhasil ditampung selama PostgreSQL tidak tersedia. Oleh karena itu, diperlukan pengujian lanjutan untuk memastikan mekanisme buffering berjalan sesuai harapan.
+
+## 8.2 Risiko Keamanan dan Operasional
+
+Penerapan centralized logging memiliki beberapa risiko keamanan dan operasional yang perlu diperhatikan, antara lain:
+
+1. **Kehilangan log:** Gangguan pada Fluent Bit atau layanan penyimpanan dapat menyebabkan log tidak terkirim apabila mekanisme buffering dan retry tidak berjalan dengan baik.
+2. **Kapasitas penyimpanan:** Penumpukan log tanpa kebijakan retensi dapat meningkatkan penggunaan kapasitas penyimpanan.
+3. **Kebocoran informasi sensitif:** Log dapat mengandung informasi rahasia seperti token, password, atau data pribadi apabila tidak dilakukan penyaringan.
+4. **Gangguan pengiriman log:** Koneksi antara Fluent Bit dan PostgreSQL yang bermasalah dapat menyebabkan keterlambatan penyimpanan data log.
+
+Pada praktikum ini, penyamaran nilai token telah diterapkan menggunakan filter Lua untuk mengganti nilai token pengujian menjadi `[REDACTED]`.
+
+## 8.3 Rekomendasi Perbaikan
+
+Agar sistem centralized logging dapat diterapkan pada lingkungan yang lebih mendekati kondisi produksi, beberapa perbaikan yang dapat dilakukan adalah:
+
+1. Mengatur kapasitas filesystem buffering dan mekanisme retry agar pengiriman log lebih tahan terhadap gangguan sementara.
+2. Menerapkan kebijakan retensi dan backup secara berkala untuk mengelola penyimpanan log.
+3. Memastikan informasi sensitif disaring sebelum dikirim ke database.
+4. Melakukan pemantauan terhadap jumlah record yang diterima, kegagalan pengiriman, penggunaan buffer, dan kondisi layanan.
+5. Melakukan pengujian pemulihan layanan secara berkala untuk memastikan log dapat dikirim kembali setelah terjadi gangguan.
+6. Mengevaluasi penggunaan sistem penyimpanan log khusus apabila volume data semakin besar.
+
+
+# 9. Kesimpulan
+
+Berdasarkan praktikum yang telah dilakukan, dapat disimpulkan bahwa centralized logging menggunakan Fluent Bit dan PostgreSQL dapat diterapkan untuk mengumpulkan dan menyimpan log dari beberapa container Docker secara terpusat.
+
+Fluent Bit berperan sebagai pengumpul dan pengirim log, sedangkan PostgreSQL digunakan sebagai tempat penyimpanan data log dengan tipe JSONB. Penggunaan Docker logging driver `fluentd` memungkinkan log dari container generator diteruskan menuju Fluent Bit untuk diproses dan disimpan ke dalam database.
+
+Praktikum ini juga menunjukkan penerapan filter Lua untuk menyamarkan informasi sensitif pada log, pembuatan view untuk menampilkan data log terbaru, serta penggunaan query SQL untuk melakukan analisis terhadap data yang tersimpan.
+
+Selain itu, pengujian buffering menunjukkan adanya penambahan sebanyak 60 record setelah PostgreSQL dipulihkan. Meskipun demikian, diperlukan pengujian lanjutan untuk memastikan mekanisme buffering dapat bekerja secara optimal ketika layanan penyimpanan mengalami gangguan.
+
+Dengan demikian, praktikum ini memberikan pemahaman mengenai proses pengelolaan log secara terpusat, mulai dari pengumpulan, pemrosesan, penyimpanan, hingga analisis data log menggunakan Fluent Bit dan PostgreSQL.
+
+
+
+# 10. Penggunaan AI
+
+Artificial Intelligence (AI) digunakan sebagai alat bantu selama pelaksanaan praktikum dan penyusunan laporan Bab 6. Penggunaan AI mencakup beberapa hal berikut:
+
+1. **Pemahaman Materi:** Membantu memahami konsep centralized logging serta fungsi Fluent Bit dan PostgreSQL dalam pengelolaan log secara terpusat.
+
+2. **Konfigurasi Sistem:** Membantu memahami konfigurasi Docker Compose, Fluent Bit, PostgreSQL, dan penggunaan Docker logging driver.
+
+3. **Pemecahan Masalah:** Membantu menganalisis pesan error dan kendala yang muncul selama proses implementasi dan pengujian praktikum.
+
+4. **Analisis Hasil Pengujian:** Membantu memahami hasil pengujian, termasuk penyimpanan log, penggunaan JSONB, proses redaksi data sensitif, dan pengujian buffering.
+
+5. **Penyusunan Laporan:** Membantu menyusun, menjelaskan, dan merapikan dokumentasi hasil praktikum agar lebih sistematis dan mudah dipahami.
+
+Seluruh implementasi, konfigurasi, dan pengujian tetap dilakukan secara langsung oleh praktikan. Hasil bantuan AI diperiksa dan disesuaikan kembali dengan kondisi serta hasil praktikum yang sebenarnya.
+
+
+# 11. Daftar Pustaka
+
+1. Fluent Bit. (n.d.). *Fluent Bit Documentation*. https://docs.fluentbit.io/manual/
+
+2. Docker. (n.d.). *Configure logging drivers*. Docker Documentation. https://docs.docker.com/engine/logging/configure/
+
+3. Docker. (n.d.). *Fluentd logging driver*. Docker Documentation. https://docs.docker.com/engine/logging/drivers/fluentd/
+
+4. PostgreSQL Global Development Group. (n.d.). *JSON Types*. PostgreSQL Documentation. https://www.postgresql.org/docs/current/datatype-json.html
+
+5. PostgreSQL Global Development Group. (n.d.). *CREATE VIEW*. PostgreSQL Documentation. https://www.postgresql.org/docs/current/sql-createview.html
+
