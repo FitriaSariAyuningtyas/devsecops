@@ -136,6 +136,9 @@ Keterangan konfigurasi:
 
 Dengan konfigurasi tersebut, file dan direktori yang telah ditentukan tidak akan disertakan dalam pelacakan Git.
 
+![Konfigurasi Environment](assets/bab6-10-konfigurasi-gitignore.png)
+Gambar 5.2 Tampilan Konfigurasi File .gitignore.
+
 ### 5.3 Konfigurasi Docker Compose (`compose.yaml`)
 
 File `compose.yaml` digunakan untuk mengatur dan menjalankan seluruh layanan yang dibutuhkan dalam praktikum Centralized Logging. Layanan yang digunakan terdiri dari PostgreSQL sebagai penyimpanan log, Fluent Bit sebagai pengumpul dan pengirim log, serta tiga container generator untuk menghasilkan log secara otomatis.
