@@ -28,3 +28,43 @@ Melalui praktikum ini, dilakukan simulasi pengiriman log dari beberapa container
 3. Menyimpan data log ke PostgreSQL menggunakan tipe data JSONB.
 4. Melakukan pemrosesan dan penyamaran data log menggunakan filter Lua.
 5. Melakukan analisis serta pengujian terhadap data log yang tersimpan.
+
+
+# 3. Struktur Direktori Project
+
+Project praktikum Bab 6 disusun dalam beberapa direktori untuk memisahkan konfigurasi layanan, skrip inisialisasi database, query analisis, serta file pendukung pengujian. Struktur direktori yang digunakan adalah sebagai berikut.
+
+```text
+bab-6/
+├── .env.example
+├── .gitignore
+├── compose.yaml
+├── compose.yaml.bak
+├── evidence/
+│   ├── generator-logs-backup.csv
+│   ├── log-export.csv
+│   └── log-export.sha256
+├── fluent-bit/
+│   ├── fluent-bit.conf
+│   ├── fluent-bit.conf.bak
+│   └── redact.lua
+├── init/
+│   └── 01-init-logging.sh
+├── queries/
+│   └── analysis.sql
+└── scripts/
+    └── test-buffering.sh
+```
+
+Keterangan direktori dan file:
+
+- `.env.example`: Berisi contoh variabel lingkungan untuk konfigurasi PostgreSQL dan Fluent Bit.
+- `.gitignore`: Menentukan file dan direktori yang tidak disertakan dalam pelacakan Git.
+- `compose.yaml`: Mengatur layanan Docker yang digunakan dalam praktikum.
+- `compose.yaml.bak`: File cadangan konfigurasi Docker Compose.
+- `evidence/`: Menyimpan hasil ekspor log, backup log generator, dan checksum.
+- `fluent-bit/`: Menyimpan konfigurasi Fluent Bit, skrip penyamaran data, dan file cadangan konfigurasi.
+- `init/`: Menyimpan skrip inisialisasi database PostgreSQL.
+- `queries/`: Menyimpan query SQL untuk analisis data log.
+- `scripts/`: Menyimpan skrip otomatisasi pengujian buffering.
+
