@@ -111,7 +111,7 @@ Variabel `POSTGRES_DB`, `POSTGRES_USER`, dan `POSTGRES_PASSWORD` digunakan untuk
 
 **Dokumentasi konfigurasi:**
 
-![Konfigurasi Environment](evidence/bab6-09-konfigurasi-env-example.png)
+![Konfigurasi Environment](assets/bab6-09-konfigurasi-env-example.png)
 
 *Gambar 5.1 Tampilan Konfigurasi Variabel Environment pada File `.env.example`.*
 
