@@ -617,6 +617,92 @@ Hasil pemeriksaan menunjukkan bahwa container PostgreSQL berjalan dengan status 
 Berikut dokumentasi hasil pemeriksaan container:
 
 ![Status Container Docker](assets/bab6-01-status-container.png)
-
 *Gambar 6.1 Hasil Pemeriksaan Status Container Docker pada Praktikum Bab 6.*
 
+
+## 6.2 Pemeriksaan Health Fluent Bit
+
+Pemeriksaan health Fluent Bit dilakukan melalui HTTP endpoint pada port `2020`. Pemeriksaan ini bertujuan untuk memastikan layanan Fluent Bit berjalan dan dapat memberikan respons terhadap permintaan pemeriksaan kesehatan.
+
+Hasil pemeriksaan menunjukkan bahwa Fluent Bit berhasil memberikan respons melalui endpoint health. Hal ini menunjukkan bahwa layanan Fluent Bit aktif dan endpoint pemantauannya dapat diakses.
+
+Berikut dokumentasi hasil pemeriksaan health Fluent Bit:
+
+![Health Fluent Bit](assets/bab6-02-health-fluent-bit.png)
+*Gambar 6.2 Hasil Pemeriksaan Health pada Layanan Fluent Bit.*
+
+
+## 6.3 Pemeriksaan Metrics Fluent Bit
+
+Pemeriksaan metrics dilakukan melalui HTTP endpoint Fluent Bit pada port `2020`. Metrics digunakan untuk melihat informasi statistik mengenai aktivitas pemrosesan log, seperti jumlah record yang diterima, jumlah record yang diproses, serta kondisi pengiriman data ke output.
+
+Berdasarkan hasil pemeriksaan, endpoint metrics Fluent Bit berhasil diakses dan menampilkan informasi statistik layanan. Pada saat pengambilan screenshot, beberapa nilai counter menunjukkan angka nol. Nilai tersebut menggambarkan kondisi counter pada saat pemeriksaan dilakukan.
+
+Berikut dokumentasi hasil pemeriksaan metrics Fluent Bit:
+
+![Metrics Fluent Bit](assets/bab6-03-metrics-fluent-bit.png)
+*Gambar 6.3 Hasil Pemeriksaan Metrics pada Layanan Fluent Bit.*
+
+
+## 6.4 Pemeriksaan Jumlah dan Distribusi Log
+
+Pemeriksaan jumlah dan distribusi log dilakukan menggunakan query SQL pada PostgreSQL. Pemeriksaan ini bertujuan untuk mengetahui jumlah keseluruhan data log yang tersimpan serta distribusi log berdasarkan tag masing-masing container.
+
+Hasil pemeriksaan menunjukkan bahwa tabel `logs.fluentbit` menyimpan sebanyak 13.467 record pada saat pengambilan data. Data tersebut berasal dari beberapa container, termasuk container generator praktikum Bab 6 dan layanan PMB yang menggunakan database yang sama.
+
+Distribusi log berdasarkan tag digunakan untuk mengetahui sumber data log yang tersimpan di dalam tabel.
+
+Berikut dokumentasi hasil pemeriksaan jumlah dan distribusi log:
+
+![Jumlah dan Distribusi Log](assets/bab6-04-total-dan-distribusi-log.png)
+*Gambar 6.4 Hasil Pemeriksaan Jumlah dan Distribusi Data Log pada PostgreSQL.*
+
+
+## 6.5 Pemeriksaan Detail Log dalam Format JSONB
+
+Pemeriksaan detail log dilakukan untuk melihat struktur data yang tersimpan pada tabel `logs.fluentbit` di PostgreSQL. Data log disimpan menggunakan tipe data JSONB sehingga informasi di dalamnya dapat dikelola dan diakses menggunakan operator JSON PostgreSQL.
+
+Hasil pemeriksaan menunjukkan bahwa data log memiliki beberapa informasi, seperti tag container, waktu pencatatan, sumber log, dan isi pesan log. Pada log dari generator API, nilai token yang diuji telah berubah menjadi `[REDACTED]` setelah melalui proses penyamaran menggunakan filter Lua.
+
+Berikut dokumentasi hasil pemeriksaan detail log:
+
+![Detail Log JSONB](assets/bab6-05-detail-log-jsonb.png)
+*Gambar 6.5 Tampilan Detail Data Log dalam Format JSONB pada PostgreSQL.*
+
+
+## 6.6 Verifikasi Tipe Data JSONB
+
+Verifikasi tipe data dilakukan untuk memastikan bahwa kolom `data` pada tabel `logs.fluentbit` menggunakan tipe data JSONB. Pemeriksaan dilakukan menggunakan fungsi `pg_typeof()` pada PostgreSQL dengan memeriksa data log yang berasal dari container generator Bab 6.
+
+Hasil pemeriksaan menunjukkan bahwa sebanyak 400 record dari ketiga container generator menggunakan tipe data `jsonb`. Hal ini membuktikan bahwa data log dari generator berhasil disimpan dalam format JSONB pada PostgreSQL.
+
+Berikut dokumentasi hasil verifikasi tipe data JSONB:
+
+![Verifikasi Tipe Data JSONB](assets/bab6-06-verifikasi-tipe-jsonb.png)
+*Gambar 6.6 Hasil Verifikasi Tipe Data JSONB pada Data Log Generator.*
+
+
+## 6.7 Pemeriksaan View `recent_logs`
+
+Pemeriksaan view dilakukan untuk memastikan bahwa view `logs.recent_logs` berhasil dibuat dan dapat digunakan untuk menampilkan data log berdasarkan waktu terbaru.
+
+View tersebut mengambil informasi dari tabel `logs.fluentbit` dengan menampilkan tiga kolom, yaitu `tag`, `time`, dan `data`. Pengurutan data dilakukan berdasarkan kolom `time` secara menurun sehingga log terbaru ditampilkan terlebih dahulu.
+
+Berikut dokumentasi hasil pemeriksaan view `recent_logs`:
+
+![Verifikasi View Recent Logs](assets/bab6-07-verifikasi-view-recent-logs.png)
+*Gambar 6.7 Hasil Verifikasi View `recent_logs` pada PostgreSQL.*
+
+
+## 6.8 Pengujian Buffering
+
+Pengujian buffering dilakukan untuk mengamati penambahan data log setelah layanan PostgreSQL dihentikan sementara dan kemudian diaktifkan kembali. Pengujian dijalankan menggunakan skrip `test-buffering.sh`.
+
+Berdasarkan hasil pengujian, jumlah record sebelum pengujian adalah 13.467 dan meningkat menjadi 13.527 setelah PostgreSQL dipulihkan. Dengan demikian, terdapat penambahan sebanyak 60 record.
+
+Hasil tersebut menunjukkan bahwa terdapat penambahan data log setelah layanan PostgreSQL kembali aktif. Namun, hasil pengujian ini belum cukup untuk memastikan bahwa seluruh log berhasil disimpan melalui mekanisme filesystem buffering selama PostgreSQL tidak tersedia.
+
+Berikut dokumentasi hasil pengujian buffering:
+
+![Pengujian Buffering](assets/bab6-08-pengujian-buffering.png)
+*Gambar 6.8 Hasil Pengujian Buffering pada Sistem Centralized Logging.*
