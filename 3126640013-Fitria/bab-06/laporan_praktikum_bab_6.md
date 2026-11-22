@@ -74,6 +74,25 @@ Keterangan direktori dan file:
 Bagian ini menjelaskan implementasi dan konfigurasi komponen yang digunakan dalam pembangunan sistem centralized logging. Konfigurasi meliputi pengaturan variabel lingkungan, pengelolaan file Git, Docker Compose, Fluent Bit, serta inisialisasi database PostgreSQL.
 
 
+### 4.1 Konfigurasi Environment (`.env.example`)
+
+File `.env.example` digunakan sebagai contoh konfigurasi variabel lingkungan yang dibutuhkan oleh layanan PostgreSQL dan Fluent Bit. File ini berisi informasi nama database, pengguna database, serta kredensial yang digunakan untuk menghubungkan Fluent Bit dengan PostgreSQL.
+
+Berikut isi konfigurasi `.env.example`:
+
+```env
+POSTGRES_DB=labdb
+POSTGRES_USER=labadmin
+POSTGRES_PASSWORD=labadminpass123
+
+FLUENTBIT_DB_USER=fluentbit_user
+FLUENTBIT_DB_PASSWORD=fluentbitpass123
+```
+
+Variabel `POSTGRES_DB`, `POSTGRES_USER`, dan `POSTGRES_PASSWORD` digunakan untuk mengatur database PostgreSQL. Sementara itu, `FLUENTBIT_DB_USER` dan `FLUENTBIT_DB_PASSWORD` digunakan sebagai kredensial koneksi Fluent Bit ke PostgreSQL.
+
+
+
 ### 4.3 Konfigurasi Docker Compose (`compose.yaml`)
 
 File `compose.yaml` digunakan untuk mengatur dan menjalankan seluruh layanan yang dibutuhkan dalam praktikum Centralized Logging. Layanan yang digunakan terdiri dari PostgreSQL sebagai penyimpanan log, Fluent Bit sebagai pengumpul dan pengirim log, serta tiga container generator untuk menghasilkan log secara otomatis.
