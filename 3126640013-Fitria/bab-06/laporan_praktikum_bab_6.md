@@ -498,3 +498,107 @@ Dengan query tersebut, data log yang tersimpan di PostgreSQL dapat diperiksa dan
 ![Query Analisis SQL](assets/bab6-14-query-analisis-sql.png)
 *Gambar 5.7 Tampilan Query Analisis Data Log pada File `analysis.sql`.*
 
+
+### 5.8 Skrip Pengujian Buffering (`test-buffering.sh`)
+
+File `test-buffering.sh` merupakan skrip otomatisasi yang digunakan untuk menguji proses pengiriman log ketika layanan PostgreSQL dihentikan sementara. Pengujian dilakukan dengan menghentikan PostgreSQL, menjalankan kembali container generator, kemudian mengaktifkan PostgreSQL dan memeriksa apakah terdapat penambahan data log.
+
+Berikut isi skrip `test-buffering.sh`:
+
+```bash
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+cd "$(dirname "$0")/.."
+
+if [[ ! -f .env ]]; then
+    echo "[FAIL] File .env tidak ditemukan." >&2
+    exit 1
+fi
+
+set -a
+source .env
+set +a
+
+count_rows() {
+    docker compose exec -T postgres-db \
+        psql \
+        --username "$POSTGRES_USER" \
+        --dbname "$POSTGRES_DB" \
+        --tuples-only \
+        --no-align \
+        --command 'SELECT count(*) FROM logs.fluentbit;'
+}
+
+before="$(count_rows)"
+echo "[INFO] Jumlah awal: $before"
+
+docker compose stop postgres-db
+
+docker compose up -d --force-recreate \
+    generator-auth \
+    generator-api \
+    generator-worker
+
+echo "[INFO] PostgreSQL berhenti; generator berjalan selama 25 detik."
+sleep 25
+
+docker compose start postgres-db
+
+for attempt in {1..30}; do
+    if docker compose exec -T postgres-db \
+        pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB" >/dev/null 2>&1; then
+        break
+    fi
+
+    if [[ "$attempt" -eq 30 ]]; then
+        echo "[FAIL] PostgreSQL tidak kembali sehat." >&2
+        exit 1
+    fi
+    sleep 2
+done
+
+for attempt in {1..60}; do
+    after="$(count_rows)"
+    if (( after > before )); then
+        echo "[PASS] Jumlah sesudah pemulihan: $after"
+        echo "[INFO] Kenaikan record: $((after - before))"
+        exit 0
+    fi
+    sleep 2
+done
+
+echo "[FAIL] Tidak ada record baru setelah PostgreSQL pulih." >&2
+echo "[INFO] Periksa: docker compose logs --tail 200 fluent-bit" >&2
+exit 1
+```
+
+Penjelasan skrip:
+
+1. **Pemeriksaan Environment:** Memastikan file `.env` tersedia sebelum pengujian dijalankan.
+2. **Penghitungan Data Awal:** Mengambil jumlah data log yang tersimpan di tabel `logs.fluentbit`.
+3. **Penghentian PostgreSQL:** Menghentikan sementara layanan PostgreSQL.
+4. **Menjalankan Generator:** Membuat ulang container generator untuk menghasilkan log selama PostgreSQL berhenti.
+5. **Pemulihan PostgreSQL:** Mengaktifkan kembali PostgreSQL dan menunggu hingga layanan siap menerima koneksi.
+6. **Verifikasi Data:** Membandingkan jumlah log sebelum dan sesudah pengujian untuk mengetahui apakah terdapat penambahan record.
+
+Skrip menampilkan status `[PASS]` apabila jumlah data log setelah pemulihan lebih besar daripada jumlah sebelumnya. Jika tidak ditemukan penambahan data dalam waktu pemeriksaan, skrip akan menampilkan status `[FAIL]`.
+
+Dengan skrip ini, proses pengujian buffering dapat dilakukan secara otomatis dan hasilnya dapat diperiksa berdasarkan jumlah record yang tersimpan di PostgreSQL.
+
+
+**Dokumentasi skrip pengujian:**
+
+![Skrip Pengujian Buffering](assets/bab6-15-skrip-pengujian-buffering.png)
+*Gambar 5.9 Tampilan Kode Skrip Pengujian Buffering pada File `test-buffering.sh`.*
+
+**Hasil Pengujian Buffering**
+
+Pengujian buffering dilakukan dengan menjalankan skrip `test-buffering.sh` melalui terminal. Pengujian diawali dengan menghitung jumlah log sebelum PostgreSQL dihentikan sementara. Selanjutnya, container generator dijalankan kembali untuk menghasilkan log selama proses pengujian.
+
+Setelah PostgreSQL diaktifkan kembali, skrip memeriksa jumlah record yang tersimpan di database. Hasil pengujian menunjukkan jumlah log awal sebanyak 13.467 record dan meningkat menjadi 13.527 record setelah pemulihan, sehingga terdapat penambahan sebanyak 60 record.
+
+Berikut dokumentasi hasil pengujian:
+
+![Hasil Pengujian Buffering](assets/bab6-16-hasil-pengujian-buffering.png)
+*Gambar 5.10 Hasil Pengujian Buffering dan Penambahan Record Setelah PostgreSQL Dipulihkan.*
