@@ -706,3 +706,21 @@ Berikut dokumentasi hasil pengujian buffering:
 
 ![Pengujian Buffering](assets/bab6-08-pengujian-buffering.png)
 *Gambar 6.8 Hasil Pengujian Buffering pada Sistem Centralized Logging.*
+
+
+# 7. Analisis dan Evaluasi
+
+Bagian ini membahas analisis terhadap penerapan centralized logging menggunakan Fluent Bit dan PostgreSQL. Analisis dilakukan untuk memahami risiko dalam pengelolaan log, keunggulan structured logging, keterbatasan PostgreSQL sebagai penyimpanan log, serta penggunaan log untuk observability dan forensik.
+
+### 7.1 Risiko Kehilangan Log Ketika Fluent Bit Tidak Tersedia
+
+Fluent Bit berperan sebagai perantara dalam proses pengumpulan dan pengiriman log dari container Docker menuju PostgreSQL. Apabila Fluent Bit tidak tersedia atau mengalami gangguan, proses penerimaan dan pengiriman log dapat terganggu.
+
+Beberapa risiko yang dapat terjadi antara lain:
+
+1. **Log tidak terkirim ke PostgreSQL:** Log yang dihasilkan container tidak dapat diteruskan ke database selama Fluent Bit mengalami gangguan.
+2. **Kehilangan data log:** Log berpotensi hilang apabila tidak terdapat mekanisme penyimpanan sementara atau buffer yang memadai.
+3. **Keterlambatan pemantauan:** Informasi mengenai aktivitas aplikasi tidak dapat diterima secara langsung sehingga proses identifikasi masalah menjadi lebih lambat.
+4. **Gangguan analisis:** Data log yang tidak terkumpul secara lengkap dapat memengaruhi proses analisis dan penelusuran kejadian.
+
+Untuk mengurangi risiko tersebut, diperlukan mekanisme buffering berbasis filesystem, pengaturan restart otomatis pada layanan Fluent Bit, serta pemantauan kondisi layanan secara berkala.
