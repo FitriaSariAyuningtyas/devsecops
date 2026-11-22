@@ -69,6 +69,11 @@ Keterangan direktori dan file:
 - `scripts/`: Menyimpan skrip otomatisasi pengujian buffering.
 
 
+# 4. Implementasi dan Konfigurasi
+
+Bagian ini menjelaskan implementasi dan konfigurasi komponen yang digunakan dalam pembangunan sistem centralized logging. Konfigurasi meliputi pengaturan variabel lingkungan, pengelolaan file Git, Docker Compose, Fluent Bit, serta inisialisasi database PostgreSQL.
+
+
 ### 4.3 Konfigurasi Docker Compose (`compose.yaml`)
 
 File `compose.yaml` digunakan untuk mengatur dan menjalankan seluruh layanan yang dibutuhkan dalam praktikum Centralized Logging. Layanan yang digunakan terdiri dari PostgreSQL sebagai penyimpanan log, Fluent Bit sebagai pengumpul dan pengirim log, serta tiga container generator untuk menghasilkan log secara otomatis.
