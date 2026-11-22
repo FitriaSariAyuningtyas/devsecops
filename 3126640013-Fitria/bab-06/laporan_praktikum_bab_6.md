@@ -416,3 +416,85 @@ Penjelasan skrip:
 
 Dengan skrip ini, struktur database PostgreSQL dapat disiapkan secara otomatis untuk mendukung proses penyimpanan dan analisis log dari Fluent Bit.
 
+**Dokumentasi konfigurasi:**
+
+![Inisialisasi Database PostgreSQL](ssets/bab6-13-inisialisasi-database-postgresql.png)
+*Gambar 5.6 Tampilan Skrip Inisialisasi Database PostgreSQL pada File `01-init-logging.sh`.*
+
+
+### 5.7 Konfigurasi Query Analisis (`analysis.sql`)
+
+File `analysis.sql` berisi kumpulan query SQL yang digunakan untuk melakukan analisis terhadap data log yang tersimpan di PostgreSQL. Query ini membantu melihat jumlah event, distribusi log, informasi container, pencarian pesan berdasarkan severity, serta jumlah log dalam interval waktu tertentu.
+
+Berikut isi file `analysis.sql`:
+
+```sql
+\pset pager off
+\timing on
+
+-- 1. Jumlah event dan rentang waktu.
+SELECT
+    count(*) AS total_event,
+    min(time) AS event_pertama,
+    max(time) AS event_terakhir
+FROM logs.fluentbit;
+
+-- 2. Distribusi berdasarkan tag Docker.
+SELECT
+    tag,
+    count(*) AS total
+FROM logs.fluentbit
+GROUP BY tag
+ORDER BY total DESC, tag;
+
+-- 3. Metadata terstruktur dari Docker logging driver.
+SELECT
+    time,
+    tag,
+    replace(data ->> 'container_name', '/', '') AS container_name,
+    data ->> 'source' AS source,
+    left(data ->> 'log', 160) AS log_preview
+FROM logs.fluentbit
+ORDER BY time DESC
+LIMIT 15;
+
+-- 4. Pencarian severity pada JSON yang masih berada di field log.
+SELECT
+    time,
+    tag,
+    data ->> 'log' AS log_message
+FROM logs.fluentbit
+WHERE data ->> 'log' ILIKE '%"severity":"ERROR"%'
+ORDER BY time DESC;
+
+-- 5. Ringkasan per menit untuk mengamati laju ingest.
+SELECT
+    date_trunc('minute', time) AS minute_bucket,
+    count(*) AS total
+FROM logs.fluentbit
+GROUP BY minute_bucket
+ORDER BY minute_bucket DESC
+LIMIT 10;
+
+-- Contoh retensi; tinjau dahulu sebelum menghapus data.
+-- DELETE FROM logs.fluentbit
+-- WHERE time < CURRENT_TIMESTAMP - INTERVAL '7 days';
+```
+
+Penjelasan query:
+
+1. **Jumlah Event dan Rentang Waktu:** Menghitung jumlah seluruh log serta mengetahui waktu log pertama dan terakhir.
+2. **Distribusi Log:** Mengelompokkan data log berdasarkan tag Docker untuk mengetahui jumlah log dari setiap container.
+3. **Metadata Log:** Menampilkan waktu, tag, nama container, sumber log, dan sebagian isi pesan log.
+4. **Pencarian Severity:** Mencari pesan log yang memiliki nilai severity `ERROR`.
+5. **Ringkasan per Menit:** Menghitung jumlah log berdasarkan kelompok waktu per menit untuk mengamati laju masuknya log.
+
+Pada bagian akhir terdapat contoh query retensi untuk menghapus log yang berusia lebih dari tujuh hari. Query tersebut masih berupa komentar sehingga tidak dijalankan secara otomatis.
+
+Dengan query tersebut, data log yang tersimpan di PostgreSQL dapat diperiksa dan dianalisis berdasarkan jumlah, sumber, isi pesan, serta waktu penerimaan log.
+
+**Dokumentasi query analisis:**
+
+![Query Analisis SQL](assets/bab6-14-query-analisis-sql.png)
+*Gambar 5.7 Tampilan Query Analisis Data Log pada File `analysis.sql`.*
+
