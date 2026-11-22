@@ -30,7 +30,26 @@ Melalui praktikum ini, dilakukan simulasi pengiriman log dari beberapa container
 5. Melakukan analisis serta pengujian terhadap data log yang tersimpan.
 
 
-# 3. Struktur Direktori Project
+# 3. Alat dan Lingkungan Praktikum
+
+Praktikum Centralized Logging dilaksanakan menggunakan perangkat keras dan perangkat lunak yang mendukung proses pengumpulan, pemrosesan, penyimpanan, serta analisis log dari container Docker.
+
+Adapun alat dan lingkungan yang digunakan dalam praktikum ini adalah sebagai berikut.
+
+| No. | Alat atau Teknologi | Keterangan |
+|---|---|---|
+| 1 | Laptop | Perangkat untuk menjalankan praktikum |
+| 2 | Windows | Sistem operasi utama |
+| 3 | WSL (Windows Subsystem for Linux) | Lingkungan Linux untuk menjalankan perintah praktikum |
+| 4 | Docker | Menjalankan aplikasi dalam container |
+| 5 | Docker Compose | Mengelola beberapa layanan container |
+| 6 | Fluent Bit 3.2 | Mengumpulkan dan memproses log |
+| 7 | PostgreSQL 16 | Menyimpan data log |
+| 8 | Alpine Linux 3.20 | Image untuk menjalankan container generator log |
+| 9 | Git dan GitHub | Mengelola dan menyimpan repository project |
+| 10 | Terminal Linux | Menjalankan perintah dan pengujian praktikum |
+
+# 4. Struktur Direktori Project
 
 Project praktikum Bab 6 disusun dalam beberapa direktori untuk memisahkan konfigurasi layanan, skrip inisialisasi database, query analisis, serta file pendukung pengujian. Struktur direktori yang digunakan adalah sebagai berikut.
 
@@ -69,11 +88,11 @@ Keterangan direktori dan file:
 - `scripts/`: Menyimpan skrip otomatisasi pengujian buffering.
 
 
-# 4. Implementasi dan Konfigurasi
+# 5. Implementasi dan Konfigurasi
 
 Bagian ini menjelaskan implementasi dan konfigurasi komponen yang digunakan dalam pembangunan sistem centralized logging. Konfigurasi meliputi pengaturan variabel lingkungan, pengelolaan file Git, Docker Compose, Fluent Bit, serta inisialisasi database PostgreSQL.
 
-### 4.1 Konfigurasi Environment (`.env.example`)
+### 5.1 Konfigurasi Environment (`.env.example`)
 
 File `.env.example` digunakan sebagai contoh konfigurasi variabel lingkungan yang dibutuhkan oleh layanan PostgreSQL dan Fluent Bit.
 
@@ -94,12 +113,12 @@ Variabel `POSTGRES_DB`, `POSTGRES_USER`, dan `POSTGRES_PASSWORD` digunakan untuk
 
 ![Konfigurasi Environment](evidence/bab6-09-konfigurasi-env-example.png)
 
-*Gambar 4.1 Tampilan Konfigurasi Variabel Environment pada File `.env.example`.*
+*Gambar 5.1 Tampilan Konfigurasi Variabel Environment pada File `.env.example`.*
 
 
 
 
-### 4.3 Konfigurasi Docker Compose (`compose.yaml`)
+### 5.3 Konfigurasi Docker Compose (`compose.yaml`)
 
 File `compose.yaml` digunakan untuk mengatur dan menjalankan seluruh layanan yang dibutuhkan dalam praktikum Centralized Logging. Layanan yang digunakan terdiri dari PostgreSQL sebagai penyimpanan log, Fluent Bit sebagai pengumpul dan pengirim log, serta tiga container generator untuk menghasilkan log secara otomatis.
 
