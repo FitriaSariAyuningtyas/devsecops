@@ -68,3 +68,123 @@ Keterangan direktori dan file:
 - `queries/`: Menyimpan query SQL untuk analisis data log.
 - `scripts/`: Menyimpan skrip otomatisasi pengujian buffering.
 
+### 4.3 Konfigurasi Docker Compose (`compose.yaml`)
+
+File `compose.yaml` digunakan untuk mengatur dan menjalankan seluruh layanan yang dibutuhkan dalam praktikum Centralized Logging. Layanan yang digunakan terdiri dari PostgreSQL sebagai penyimpanan log, Fluent Bit sebagai pengumpul dan pengirim log, serta tiga container generator untuk menghasilkan log secara otomatis.
+
+Konfigurasi layanan PostgreSQL:
+
+```yaml
+services:
+  postgres-db:
+    image: postgres:16-alpine
+    container_name: bab6-postgres-db
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+PostgreSQL menggunakan image postgres:16-alpine dan berfungsi sebagai tempat penyimpanan log. Data disimpan menggunakan Docker volume agar tetap tersedia meskipun container dihentikan atau dibuat ulang. Health check digunakan untuk memastikan PostgreSQL siap menerima koneksi.
+
+Konfigurasi layanan Fluent Bit:
+  fluent-bit:
+    image: cr.fluentbit.io/fluent/fluent-bit:3.2
+    container_name: bab6-fluent-bit
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:2020:2020"
+      - "127.0.0.1:24224:24224"
+    volumes:
+      - ./fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
+      - fluentbit_storage:/var/log/flb-storage
+      - ./fluent-bit/redact.lua:/fluent-bit/etc/redact.lua:ro
+    command: ["--config", "/fluent-bit/etc/fluent-bit.conf"]
+
+Fluent Bit bertugas menerima log dari container lain, melakukan pemrosesan sesuai konfigurasi, kemudian mengirimkannya ke PostgreSQL. Layanan ini dijalankan setelah PostgreSQL dinyatakan sehat. Volume fluentbit_storage digunakan untuk mendukung penyimpanan buffer berbasis filesystem.
+
+Konfigurasi container generator:
+  generator-auth:
+    image: alpine:3.20
+    command:
+      - /bin/sh
+      - -c
+      - |
+        i=1
+        while [ "$$i" -le 20 ]; do
+          printf '{"service":"auth","severity":"INFO","event":"login_test","sequence":%s}\n' "$$i"
+          i=$$((i + 1))
+          sleep 1
+        done
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: "127.0.0.1:24224"
+        fluentd-async: "true"
+        tag: "docker.{{.Name}}"
+    depends_on:
+      - fluent-bit
+
+  generator-api:
+    image: alpine:3.20
+    command:
+      - /bin/sh
+      - -c
+      - |
+        i=1
+        while [ "$$i" -le 20 ]; do
+          printf '{"service":"api","severity":"INFO","event":"request_test","sequence":%s,"token":"CANARY_BAB6_SECRET_2026"}\n' "$$i"
+          i=$$((i + 1))
+          sleep 1
+        done
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: "127.0.0.1:24224"
+        fluentd-async: "true"
+        tag: "docker.{{.Name}}"
+    depends_on:
+      - fluent-bit
+
+  generator-worker:
+    image: alpine:3.20
+    command:
+      - /bin/sh
+      - -c
+      - |
+        i=1
+        while [ "$$i" -le 20 ]; do
+          printf '{"service":"worker","severity":"INFO","event":"job_test","sequence":%s}\n' "$$i"
+          i=$((i + 1))
+          sleep 1
+        done
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: "127.0.0.1:24224"
+        fluentd-async: "true"
+        tag: "docker.{{.Name}}"
+    depends_on:
+      - fluent-bit
+
+volumes:
+  postgres_data:
+  fluentbit_storage:
+
+Ketiga container generator menggunakan image Alpine dan menghasilkan log dalam format JSON. Log dikirim menggunakan Docker logging driver fluentd menuju Fluent Bit melalui port 24224. Setiap generator menghasilkan 20 event dengan interval satu detik. Pada konfigurasi ini, generator menghasilkan event dengan severity INFO.
+
+Secara keseluruhan, Docker Compose menghubungkan container generator, Fluent Bit, dan PostgreSQL sehingga proses pengumpulan, pemrosesan, serta penyimpanan log dapat dilakukan secara terpusat.
+
