@@ -602,3 +602,21 @@ Berikut dokumentasi hasil pengujian:
 
 ![Hasil Pengujian Buffering](assets/bab6-16-hasil-pengujian-buffering.png)
 *Gambar 5.10 Hasil Pengujian Buffering dan Penambahan Record Setelah PostgreSQL Dipulihkan.*
+
+
+# 6. Hasil Implementasi dan Pengujian
+
+Bagian ini membahas hasil implementasi sistem centralized logging menggunakan Fluent Bit dan PostgreSQL. Pengujian dilakukan untuk memastikan setiap layanan berjalan sesuai konfigurasi, log dapat diterima oleh Fluent Bit, serta data log berhasil disimpan dan dianalisis menggunakan PostgreSQL.
+
+## 6.1 Pemeriksaan Status Container Docker
+
+Pemeriksaan status container dilakukan menggunakan perintah `docker compose ps --all`. Pemeriksaan ini bertujuan untuk mengetahui kondisi layanan PostgreSQL, Fluent Bit, dan container generator yang digunakan dalam praktikum.
+
+Hasil pemeriksaan menunjukkan bahwa container PostgreSQL berjalan dengan status `healthy`, sedangkan Fluent Bit berada dalam kondisi `running`. Sementara itu, ketiga container generator menunjukkan status `exited (0)` karena proses pembuatan log telah selesai dijalankan.
+
+Berikut dokumentasi hasil pemeriksaan container:
+
+![Status Container Docker](evidence/bab6-01-status-container.png)
+
+*Gambar 6.1 Hasil Pemeriksaan Status Container Docker pada Praktikum Bab 6.*
+
