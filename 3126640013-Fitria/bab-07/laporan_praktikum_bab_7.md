@@ -9,7 +9,7 @@
 - **Kelas:** STr LJ Teknik Informatika B
 
 - **Judul Praktikum:** Monitoring Resource dengan Prometheus, cAdvisor, Node Exporter, dan Grafana
-- 
+  
 ## 1. Tujuan Praktikum
 
 Praktikum ini bertujuan untuk:
