@@ -1,7 +1,5 @@
 # BAB 7 — MONITORING RESOURCE DENGAN PROMETHEUS, CADVISOR, NODE EXPORTER, DAN GRAFANA
 
-## 1. Identitas Praktikum
-
 **Disusun untuk Memenuhi Tugas Praktikum Mata Kuliah DevOps**
 
 - **Nama:** Fitria Sari Ayuningtyas
@@ -11,12 +9,17 @@
 - **Kelas:** STr LJ Teknik Informatika B
 
 - **Judul Praktikum:** Monitoring Resource dengan Prometheus, cAdvisor, Node Exporter, dan Grafana
+- 
+## 1. Tujuan Praktikum
 
-## 2. Tujuan Praktikum
+Praktikum ini bertujuan untuk:
+1. Membedakan monitoring metrics dan logging events.
+2. Menjalankan Prometheus sebagai scraper dan time-series database.
+3. Mengumpulkan metrik resource host menggunakan Node Exporter dan metrik container menggunakan cAdvisor.
+4. Membuat dashboard Grafana untuk memantau penggunaan CPU, memori, disk, jaringan, dan container.
+5. Mengintegrasikan data log PostgreSQL dari praktikum Bab 6 ke Grafana.
 
-Praktikum ini bertujuan untuk memahami penerapan monitoring resource pada sistem menggunakan Prometheus, cAdvisor, Node Exporter, dan Grafana. Melalui praktikum ini, mahasiswa diharapkan mampu membedakan monitoring metrics dan logging events, menjalankan Prometheus sebagai pengumpul dan penyimpan metrik, memantau penggunaan resource host dan container, membuat dashboard monitoring, serta mengintegrasikan data log PostgreSQL dari praktikum Bab 6 ke Grafana.
-
-## 3. Dasar Teori Singkat
+## 2. Dasar Teori Singkat
 
 Monitoring merupakan proses pengamatan kondisi sistem melalui pengumpulan metrik secara berkala, seperti penggunaan CPU, memori, disk, dan jaringan. Monitoring membantu mengetahui kondisi dan perubahan performa sistem, sedangkan logging digunakan untuk mencatat kejadian atau aktivitas secara lebih terperinci.
 
