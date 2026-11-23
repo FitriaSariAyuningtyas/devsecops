@@ -118,3 +118,48 @@ Setelah Node Exporter dijalankan kembali, metrik CPU host kembali tersedia melal
 Integrasi PostgreSQL sebagai sumber data Grafana berhasil dilakukan. Pengujian koneksi menunjukkan hasil `Database Connection OK`. Selanjutnya, query SQL terhadap tabel `logs.fluentbit` berhasil menampilkan 10 data log terbaru yang tersimpan pada PostgreSQL.
 
 Dengan demikian, Grafana berhasil mengakses data monitoring dari Prometheus sekaligus data log dari PostgreSQL Bab 6.
+
+## 6. Analisis
+
+Berdasarkan hasil praktikum, Prometheus berhasil mengumpulkan metrik dari Node Exporter dan cAdvisor, sedangkan Grafana berhasil menampilkan data tersebut dalam bentuk dashboard. Pengujian juga menunjukkan bahwa sistem dapat mendeteksi kondisi tertentu melalui alert `ContainerHighCPU` dan `TargetDown`. Hal ini membuktikan bahwa monitoring dapat membantu mengetahui kondisi resource host maupun container secara berkala.
+
+Salah satu kendala yang ditemukan terjadi saat melakukan query data log PostgreSQL. Query awal mengalami kesalahan karena menggunakan nama kolom `timestamp`, sedangkan kolom waktu pada tabel `logs.fluentbit` sebenarnya bernama `time`. Setelah nama kolom disesuaikan, query berhasil dijalankan dan menampilkan data log. Kendala tersebut menunjukkan pentingnya memeriksa struktur tabel sebelum menyusun query SQL.
+
+Dari sisi operasional dan keamanan, penggunaan cAdvisor dengan konfigurasi `privileged: true` memiliki risiko karena memberikan hak akses container yang tinggi terhadap host. Selain itu, endpoint metrik dapat memperlihatkan informasi mengenai kondisi dan konfigurasi infrastruktur. Oleh karena itu, konfigurasi tersebut perlu dibatasi penggunaannya pada lingkungan praktikum.
+
+Untuk penerapan pada lingkungan produksi, hak akses container sebaiknya dibatasi sesuai kebutuhan, endpoint monitoring hanya dapat diakses melalui jaringan internal, serta kredensial disimpan dengan aman. Selain itu, aturan alert perlu disesuaikan dengan kondisi sistem sebenarnya agar notifikasi yang dihasilkan relevan dan dapat ditindaklanjuti.
+
+## 7. Threat Statement
+
+Sistem monitoring memiliki beberapa potensi ancaman, seperti akses tidak sah terhadap endpoint metrik, penyalahgunaan hak akses container, serta kebocoran kredensial Grafana dan PostgreSQL. Informasi metrik yang terbuka juga dapat memberikan gambaran mengenai kondisi dan konfigurasi infrastruktur.
+
+Apabila ancaman tersebut tidak dikendalikan, pihak yang tidak berwenang dapat memperoleh informasi internal sistem atau menyalahgunakan akses yang tersedia. Oleh karena itu, diperlukan pembatasan akses endpoint monitoring, pengelolaan kredensial secara aman, serta pembatasan hak akses container sesuai kebutuhan.
+
+## 8. Tindak Lanjut
+
+Berdasarkan hasil praktikum, beberapa tindak lanjut yang dapat dilakukan untuk meningkatkan kualitas sistem monitoring adalah:
+
+1. Menyesuaikan threshold alert berdasarkan penggunaan resource yang sebenarnya agar notifikasi lebih relevan.
+2. Membatasi akses terhadap endpoint Prometheus, Node Exporter, dan cAdvisor agar informasi metrik tidak dapat diakses sembarang pihak.
+3. Mengamankan kredensial Grafana dan PostgreSQL serta menghindari penyimpanan informasi sensitif di repository.
+4. Melakukan pemantauan kapasitas penyimpanan Prometheus agar data metrik tidak memenuhi ruang disk.
+5. Mengembangkan dashboard dengan menambahkan visualisasi penggunaan disk dan jaringan agar pemantauan resource lebih lengkap.
+
+## 9. Kesimpulan
+
+Berdasarkan praktikum Bab 7, sistem monitoring resource menggunakan Prometheus, Node Exporter, cAdvisor, dan Grafana berhasil dijalankan. Prometheus dapat mengumpulkan metrik penggunaan resource host dan container, sedangkan Grafana dapat menampilkan data tersebut melalui dashboard monitoring.
+
+Pengujian alert `ContainerHighCPU` dan `TargetDown` juga berhasil menunjukkan kemampuan sistem dalam mendeteksi perubahan kondisi layanan. Selain itu, integrasi PostgreSQL Bab 6 berhasil dilakukan sehingga data log dapat diakses melalui Grafana.
+
+Dengan demikian, praktikum ini memberikan pemahaman mengenai penerapan monitoring resource dan integrasi data monitoring dengan logging untuk membantu pengamatan kondisi sistem.
+
+## 10. Penggunaan AI
+
+Dalam penyusunan laporan praktikum ini, AI digunakan sebagai alat bantu untuk memahami materi, membantu menyusun penjelasan hasil praktikum, serta merapikan dokumentasi. Seluruh proses praktikum dan pengujian dilakukan secara langsung oleh praktikan.
+
+## 11. Referensi
+
+1. Prometheus Documentation. https://prometheus.io/docs/
+2. Grafana Documentation. https://grafana.com/docs/
+3. Prometheus Node Exporter. https://github.com/prometheus/node_exporter
+4. cAdvisor Documentation. https://github.com/google/cadvisor
