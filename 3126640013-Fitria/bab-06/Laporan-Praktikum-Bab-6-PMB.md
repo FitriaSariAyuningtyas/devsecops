@@ -53,7 +53,7 @@ Retry merupakan mekanisme percobaan ulang ketika proses pengiriman log mengalami
 
 Structured log yang tersimpan di PostgreSQL dapat dianalisis menggunakan Structured Query Language (SQL). Query SQL dapat digunakan untuk menghitung jumlah log, mengelompokkan log berdasarkan layanan dan tingkat keparahan, serta menyusun kronologi kejadian berdasarkan request ID. Analisis ini membantu proses pemantauan dan investigasi insiden pada aplikasi.
 
-## 3. Alat dan Lingkungan Praktikum
+# 3. Alat dan Lingkungan Praktikum
 
 | **Komponen** | **Hasil Identifikasi** |
 |---|---|
