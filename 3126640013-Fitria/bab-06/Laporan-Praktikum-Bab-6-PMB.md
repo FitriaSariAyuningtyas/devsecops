@@ -53,34 +53,32 @@ Retry merupakan mekanisme percobaan ulang ketika proses pengiriman log mengalami
 
 Structured log yang tersimpan di PostgreSQL dapat dianalisis menggunakan Structured Query Language (SQL). Query SQL dapat digunakan untuk menghitung jumlah log, mengelompokkan log berdasarkan layanan dan tingkat keparahan, serta menyusun kronologi kejadian berdasarkan request ID. Analisis ini membantu proses pemantauan dan investigasi insiden pada aplikasi.
 
-# 3. Alat dan Lingkungan Praktikum
+## 3. Alat dan Lingkungan Praktikum
 
-Praktikum Bab 6 dilaksanakan menggunakan beberapa perangkat keras dan perangkat lunak untuk menjalankan layanan aplikasi, mengumpulkan log, serta melakukan analisis data log.
+| **Komponen** | **Hasil Identifikasi** |
+|---|---|
+| Operating System | Windows |
+| Lingkungan Linux | Ubuntu WSL |
+| Docker | Docker Desktop |
+| Docker Compose | Digunakan untuk mengelola layanan container |
+| Fluent Bit | 4.2.8 |
+| PostgreSQL | 16 |
+| Bash | Menjalankan skrip dan perintah praktikum |
+| curl | Melakukan pengujian endpoint layanan |
+| Python | Python 3 |
+| Git dan GitHub | Mengelola dan menyimpan repository project |
+| Proyek Praktikum | PMB DevSecOps Laboratory |
 
-### 3.1 Perangkat Keras
+### 3.1 Lingkungan Praktikum
 
-- Laptop atau komputer dengan sistem operasi Windows.
-- Memori RAM minimal 2 GB.
-- Ruang penyimpanan yang tersedia minimal 3 GB.
+Praktikum menggunakan proyek **PMB DevSecOps Laboratory** yang dijalankan melalui Docker Compose. Lingkungan tersebut terdiri dari enam container, yaitu:
 
-### 3.2 Perangkat Lunak dan Teknologi
-
-| No. | Perangkat Lunak/Teknologi | Fungsi |
-|---|---|---|
-| 1 | Windows | Sistem operasi utama |
-| 2 | Ubuntu WSL | Lingkungan Linux untuk menjalankan perintah praktikum |
-| 3 | Docker Desktop | Menjalankan container aplikasi dan layanan pendukung |
-| 4 | Docker Compose | Mengelola beberapa container dalam satu lingkungan |
-| 5 | Fluent Bit 4.2.8 | Mengumpulkan dan meneruskan log aplikasi |
-| 6 | PostgreSQL 16 | Menyimpan data transaksi dan log terpusat |
-| 7 | Bash | Menjalankan skrip praktikum |
-| 8 | curl | Melakukan pengujian endpoint layanan |
-| 9 | Python 3 | Mendukung aplikasi dan pengujian |
-| 10 | GitHub | Menyimpan kode proyek dan laporan praktikum |
-
-### 3.3 Lingkungan Praktikum
-
-Praktikum menggunakan proyek **PMB DevSecOps Laboratory** yang dijalankan melalui Docker Compose. Lingkungan tersebut terdiri dari enam container, yaitu `registration-api`, `auth-service`, `verification-worker`, `app-db`, `fluent-bit`, dan `log-db`.
+1. `registration-api`
+2. `auth-service`
+3. `verification-worker`
+4. `app-db`
+5. `fluent-bit`
+6. `log-db`
 
 Seluruh layanan dijalankan dalam lingkungan container agar proses pengumpulan, penyimpanan, dan analisis log dapat dilakukan secara terintegrasi.
 
