@@ -92,3 +92,53 @@ PostgreSQL dari praktikum Bab 6 ditambahkan sebagai data source pada Grafana. Pe
 **Gambar 7. Hasil Query Data Log PostgreSQL**
 
 ![Hasil query data log PostgreSQL](assets/B7-26-integrasi-postgresql-query.png)
+
+## 5. Hasil Pengujian
+
+Berdasarkan praktikum yang telah dilakukan, diperoleh hasil pengujian sebagai berikut.
+
+### 5.1 Verifikasi Monitoring Stack
+
+Hasil verifikasi menunjukkan bahwa Prometheus dan Grafana berhasil berjalan. Ketiga target monitoring, yaitu Prometheus, Node Exporter, dan cAdvisor, berstatus UP dengan total tiga target aktif dan tidak terdapat target DOWN. Query PromQL untuk metrik CPU dan memori juga berhasil menghasilkan data.
+
+**Gambar 8. Hasil Verifikasi Monitoring Stack**
+
+![Hasil verifikasi monitoring stack](assets/B7-18-verifikasi-stack-berhasil.png)
+
+### 5.2 Hasil Dashboard Monitoring
+
+Dashboard Grafana berhasil menampilkan informasi penggunaan resource, meliputi jumlah target aktif, penggunaan CPU dan memori host, serta penggunaan CPU dan memori container. Hasil visualisasi menunjukkan bahwa data metrik berhasil diterima dan ditampilkan melalui Grafana.
+
+**Gambar 9. Dashboard Monitoring**
+
+![Dashboard monitoring](assets/B7-24-dashboard-monitoring-akhir.png)
+
+### 5.3 Hasil Pengujian Alert
+
+Pengujian `ContainerHighCPU` menghasilkan penggunaan CPU pada container `bab7-load-generator` sebesar 0,500188 cores. Alert terdeteksi dengan status `firing`, sehingga menunjukkan bahwa Prometheus berhasil mendeteksi penggunaan CPU yang memenuhi kondisi aturan.
+
+Pengujian `TargetDown` dilakukan dengan menghentikan Node Exporter. Hasil query menunjukkan nilai `up` sebesar 0 dan alert `TargetDown` berstatus `firing`. Setelah layanan dipulihkan, metrik CPU kembali tersedia dengan nilai sekitar 0,5395 atau 53,95%.
+
+**Gambar 10. Hasil Pengujian Alert CPU**
+
+![Pengujian alert CPU](assets/B7-20-pengujian-alert-cpu.png)
+
+**Gambar 11. Hasil Pengujian Alert TargetDown**
+
+![Pengujian alert TargetDown](assets/B7-21-pengujian-alert-target-down.png)
+
+**Gambar 12. Verifikasi Metrik CPU Setelah Pemulihan**
+
+![Verifikasi metrik CPU pulih](assets/B7-23-verifikasi-metrik-cpu-pulih.png)
+
+### 5.4 Hasil Integrasi PostgreSQL dengan Grafana
+
+Integrasi PostgreSQL Bab 6 dengan Grafana berhasil dilakukan. Pengujian koneksi menghasilkan pesan `Database Connection OK`. Selanjutnya, query SQL berhasil menampilkan 10 data log dari tabel `logs.fluentbit`, yang terdiri atas informasi tag, waktu pencatatan, dan data log dalam format JSON.
+
+**Gambar 13. Hasil Koneksi PostgreSQL**
+
+![Koneksi PostgreSQL berhasil](assets/B7-25-integrasi-postgresql-koneksi.png)
+
+**Gambar 14. Hasil Query Data Log PostgreSQL**
+
+![Hasil query PostgreSQL](assets/B7-26-integrasi-postgresql-query.png)
