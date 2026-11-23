@@ -43,3 +43,52 @@ Grafana merupakan platform visualisasi yang digunakan untuk menampilkan data dar
 | PostgreSQL | Database log Bab 6 |
 | Web Browser | Digunakan untuk mengakses Prometheus dan Grafana |
 
+## 4. Langkah Praktikum
+
+### 4.1 Persiapan dan Konfigurasi Monitoring
+
+Praktikum diawali dengan menyiapkan direktori kerja Bab 7 serta file konfigurasi yang dibutuhkan. Docker Compose digunakan untuk menjalankan Prometheus, Grafana, Node Exporter, dan cAdvisor dalam satu jaringan monitoring. Selanjutnya, dilakukan konfigurasi Prometheus untuk menentukan target pengambilan metrik serta recording rules dan alert rules.
+
+**Gambar 1. Konfigurasi Monitoring**
+
+![Konfigurasi recording rules dan alert rules](assets/B7-06-konfigurasi-recording-rules.png)
+
+### 4.2 Menjalankan dan Memverifikasi Monitoring Stack
+
+Seluruh layanan dijalankan menggunakan Docker Compose. Verifikasi dilakukan melalui script `verify-stack.sh` untuk memastikan layanan Prometheus dan Grafana siap digunakan, target monitoring aktif, serta query PromQL dapat menghasilkan data metrik.
+
+**Gambar 2. Hasil Verifikasi Monitoring Stack**
+
+![Verifikasi monitoring stack](assets/B7-18-verifikasi-stack-berhasil.png)
+
+### 4.3 Membuat Dashboard Monitoring
+
+Grafana digunakan untuk menampilkan data metrik dari Prometheus dalam bentuk dashboard. Dashboard mencakup jumlah target aktif, penggunaan CPU dan memori host, serta penggunaan CPU dan memori container.
+
+**Gambar 3. Dashboard Monitoring Grafana**
+
+![Dashboard monitoring Grafana](assets/B7-24-dashboard-monitoring-akhir.png)
+
+### 4.4 Melakukan Pengujian Alert
+
+Pengujian dilakukan menggunakan load generator untuk menghasilkan beban CPU pada container sehingga alert `ContainerHighCPU` dapat diuji. Selanjutnya, layanan Node Exporter dihentikan sementara untuk menguji kemampuan Prometheus dalam mendeteksi target yang tidak tersedia melalui alert `TargetDown`.
+
+**Gambar 4. Pengujian Alert CPU**
+
+![Pengujian alert CPU](assets/B7-20-pengujian-alert-cpu.png)
+
+**Gambar 5. Pengujian Alert TargetDown**
+
+![Pengujian alert TargetDown](assets/B7-21-pengujian-alert-target-down.png)
+
+### 4.5 Mengintegrasikan PostgreSQL Bab 6
+
+PostgreSQL dari praktikum Bab 6 ditambahkan sebagai data source pada Grafana. Pengujian dilakukan melalui fitur Explore dengan menjalankan query SQL untuk membaca struktur tabel dan menampilkan data log dari tabel `logs.fluentbit`.
+
+**Gambar 6. Pengujian Koneksi PostgreSQL**
+
+![Koneksi PostgreSQL berhasil](assets/B7-25-integrasi-postgresql-koneksi.png)
+
+**Gambar 7. Hasil Query Data Log PostgreSQL**
+
+![Hasil query data log PostgreSQL](assets/B7-26-integrasi-postgresql-query.png)
