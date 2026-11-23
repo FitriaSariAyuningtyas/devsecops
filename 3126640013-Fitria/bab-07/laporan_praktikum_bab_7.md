@@ -87,7 +87,7 @@ PostgreSQL dari praktikum Bab 6 ditambahkan sebagai data source pada Grafana. Pe
 
 **Gambar 6. Pengujian Koneksi PostgreSQL**
 
-![Koneksi PostgreSQL berhasil](assets/B7-25-integrasi-postgresql-koneksi.png)
+![Koneksi PostgreSQL berhasil](assets/B7-25-integrasi-postgresql-berhasil.png)
 
 **Gambar 7. Hasil Query Data Log PostgreSQL**
 
