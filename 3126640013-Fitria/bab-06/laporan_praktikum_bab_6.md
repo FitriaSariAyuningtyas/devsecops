@@ -36,18 +36,19 @@ Praktikum Centralized Logging dilaksanakan menggunakan perangkat keras dan peran
 
 Adapun alat dan lingkungan yang digunakan dalam praktikum ini adalah sebagai berikut.
 
-| No. | Alat atau Teknologi | Keterangan |
-|---|---|---|
-| 1 | Laptop | Perangkat untuk menjalankan praktikum |
-| 2 | Windows | Sistem operasi utama |
-| 3 | WSL (Windows Subsystem for Linux) | Lingkungan Linux untuk menjalankan perintah praktikum |
-| 4 | Docker | Menjalankan aplikasi dalam container |
-| 5 | Docker Compose | Mengelola beberapa layanan container |
-| 6 | Fluent Bit 3.2 | Mengumpulkan dan memproses log |
-| 7 | PostgreSQL 16 | Menyimpan data log |
-| 8 | Alpine Linux 3.20 | Image untuk menjalankan container generator log |
-| 9 | Git dan GitHub | Mengelola dan menyimpan repository project |
-| 10 | Terminal Linux | Menjalankan perintah dan pengujian praktikum |
+| **Komponen** | **Hasil Identifikasi** |
+|---|---|
+| Operating System | Ubuntu pada WSL 2 |
+| Pengguna eksekusi | `asus` |
+| Direktori kerja | `~/docker-lab/bab-6` |
+| Docker Engine | 29.7.2 |
+| Docker Compose | 5.5.0 |
+| Fluent Bit | 3.2 |
+| PostgreSQL | 16 |
+| Alpine Linux | 3.20 |
+| Git dan GitHub | Mengelola dan menyimpan repository project |
+| Terminal Linux | Menjalankan perintah dan pengujian praktikum |
+| Web Browser | Mengakses layanan dan mendukung pemeriksaan hasil praktikum |
 
 # 4. Struktur Direktori Project
 
