@@ -47,98 +47,74 @@ Grafana merupakan platform visualisasi yang digunakan untuk menampilkan data dar
 
 ### 4.1 Persiapan dan Konfigurasi Monitoring
 
-Praktikum diawali dengan menyiapkan direktori kerja Bab 7 serta file konfigurasi yang dibutuhkan. Docker Compose digunakan untuk menjalankan Prometheus, Grafana, Node Exporter, dan cAdvisor dalam satu jaringan monitoring. Selanjutnya, dilakukan konfigurasi Prometheus untuk menentukan target pengambilan metrik serta recording rules dan alert rules.
+Praktikum diawali dengan menyiapkan direktori kerja dan file konfigurasi yang diperlukan. Selanjutnya dilakukan konfigurasi Docker Compose untuk menjalankan Prometheus, Grafana, Node Exporter, dan cAdvisor. Prometheus dikonfigurasi untuk mengambil metrik dari masing-masing layanan melalui mekanisme scraping.
 
-**Gambar 1. Konfigurasi Monitoring**
+Selain itu, dibuat konfigurasi recording rules dan alert rules untuk membantu proses pengolahan metrik serta mendeteksi kondisi resource yang melebihi batas tertentu.
 
-![Konfigurasi recording rules dan alert rules](assets/B7-06-konfigurasi-recording-rules.png)
+![Konfigurasi Docker Compose](assets/B7-04-validasi-docker-compose.png)
 
-### 4.2 Menjalankan dan Memverifikasi Monitoring Stack
+![Konfigurasi recording rules](assets/B7-06-konfigurasi-recording-rules.png)
 
-Seluruh layanan dijalankan menggunakan Docker Compose. Verifikasi dilakukan melalui script `verify-stack.sh` untuk memastikan layanan Prometheus dan Grafana siap digunakan, target monitoring aktif, serta query PromQL dapat menghasilkan data metrik.
+![Konfigurasi alert rules](assets/B7-07-konfigurasi-alert-rules.png)
 
-**Gambar 2. Hasil Verifikasi Monitoring Stack**
+### 4.2 Validasi Konfigurasi
 
-![Verifikasi monitoring stack](assets/B7-18-verifikasi-stack-berhasil.png)
+Setelah konfigurasi selesai, dilakukan validasi terhadap file Prometheus, dashboard Grafana, dan script pengujian. Validasi ini bertujuan memastikan konfigurasi dapat digunakan sebelum seluruh layanan dijalankan.
 
-### 4.3 Membuat Dashboard Monitoring
+![Validasi konfigurasi Prometheus](assets/B7-13-validasi-konfigurasi-prometheus.png)
 
-Grafana digunakan untuk menampilkan data metrik dari Prometheus dalam bentuk dashboard. Dashboard mencakup jumlah target aktif, penggunaan CPU dan memori host, serta penggunaan CPU dan memori container.
+![Pengujian alert rules](assets/B7-14-pengujian-alert-rules.png)
 
-**Gambar 3. Dashboard Monitoring Grafana**
+### 4.3 Konfigurasi Grafana
 
-![Dashboard monitoring Grafana](assets/B7-24-dashboard-monitoring-akhir.png)
+Grafana dikonfigurasi menggunakan Prometheus sebagai sumber data utama. Selanjutnya dilakukan pengaturan dashboard provider dan dashboard monitoring untuk menampilkan informasi penggunaan CPU, memori, serta resource container.
 
-### 4.4 Melakukan Pengujian Alert
+![Konfigurasi datasource Grafana](assets/B7-09-konfigurasi-datasource-grafana.png)
 
-Pengujian dilakukan menggunakan load generator untuk menghasilkan beban CPU pada container sehingga alert `ContainerHighCPU` dapat diuji. Selanjutnya, layanan Node Exporter dihentikan sementara untuk menguji kemampuan Prometheus dalam mendeteksi target yang tidak tersedia melalui alert `TargetDown`.
+![Konfigurasi dashboard provider](assets/B7-10-konfigurasi-dashboard-provider.png)
 
-**Gambar 4. Pengujian Alert CPU**
+### 4.4 Menjalankan Layanan Monitoring
 
-![Pengujian alert CPU](assets/B7-20-pengujian-alert-cpu.png)
+Seluruh layanan dijalankan menggunakan Docker Compose. Setelah proses menjalankan layanan, dilakukan pemeriksaan status container untuk memastikan komponen monitoring telah berjalan.
 
-**Gambar 5. Pengujian Alert TargetDown**
+![Container monitoring berhasil dijalankan](assets/B7-16-monitoring-containers-started.png)
 
-![Pengujian alert TargetDown](assets/B7-21-pengujian-alert-target-down.png)
+![Status container monitoring](assets/B7-17-status-containers.png)
 
-### 4.5 Mengintegrasikan PostgreSQL Bab 6
+### 4.5 Integrasi PostgreSQL Bab 6
 
-PostgreSQL dari praktikum Bab 6 ditambahkan sebagai data source pada Grafana. Pengujian dilakukan melalui fitur Explore dengan menjalankan query SQL untuk membaca struktur tabel dan menampilkan data log dari tabel `logs.fluentbit`.
-
-**Gambar 6. Pengujian Koneksi PostgreSQL**
-
-![Koneksi PostgreSQL berhasil](assets/B7-25-integrasi-postgresql-berhasil.png)
-
-**Gambar 7. Hasil Query Data Log PostgreSQL**
-
-![Hasil query data log PostgreSQL](assets/B7-26-integrasi-postgresql-query.png)
+Tahap terakhir adalah mengintegrasikan PostgreSQL dari praktikum Bab 6 sebagai sumber data tambahan pada Grafana. Integrasi dilakukan agar data log yang tersimpan di PostgreSQL dapat diakses dan ditampilkan melalui fitur Explore menggunakan query SQL.
 
 ## 5. Hasil Pengujian
 
-Berdasarkan praktikum yang telah dilakukan, diperoleh hasil pengujian sebagai berikut.
-
 ### 5.1 Verifikasi Monitoring Stack
 
-Hasil verifikasi menunjukkan bahwa Prometheus dan Grafana berhasil berjalan. Ketiga target monitoring, yaitu Prometheus, Node Exporter, dan cAdvisor, berstatus UP dengan total tiga target aktif dan tidak terdapat target DOWN. Query PromQL untuk metrik CPU dan memori juga berhasil menghasilkan data.
-
-**Gambar 8. Hasil Verifikasi Monitoring Stack**
+Berdasarkan hasil verifikasi, seluruh layanan monitoring berhasil dijalankan. Prometheus, Node Exporter, dan cAdvisor menunjukkan status `UP` dengan jumlah tiga target aktif dan tidak terdapat target yang berstatus `DOWN`. Pengujian menggunakan PromQL juga berhasil menampilkan data metrik CPU, memori, dan container.
 
 ![Hasil verifikasi monitoring stack](assets/B7-18-verifikasi-stack-berhasil.png)
 
-### 5.2 Hasil Dashboard Monitoring
+### 5.2 Dashboard Monitoring Grafana
 
-Dashboard Grafana berhasil menampilkan informasi penggunaan resource, meliputi jumlah target aktif, penggunaan CPU dan memori host, serta penggunaan CPU dan memori container. Hasil visualisasi menunjukkan bahwa data metrik berhasil diterima dan ditampilkan melalui Grafana.
+Dashboard Grafana berhasil menampilkan informasi monitoring berupa jumlah target aktif, penggunaan CPU host, penggunaan memori host, serta penggunaan CPU dan memori pada container. Data tersebut diperoleh dari Prometheus dan ditampilkan dalam bentuk visualisasi.
 
-**Gambar 9. Dashboard Monitoring**
+![Dashboard monitoring Grafana](assets/B7-24-dashboard-monitoring-akhir.png)
 
-![Dashboard monitoring](assets/B7-24-dashboard-monitoring-akhir.png)
+### 5.3 Pengujian Alert
 
-### 5.3 Hasil Pengujian Alert
+Pengujian alert dilakukan menggunakan load generator untuk menghasilkan peningkatan penggunaan CPU. Hasil pengujian menunjukkan bahwa metrik penggunaan CPU container berhasil terbaca dan alert `ContainerHighCPU` berada dalam status `firing`.
 
-Pengujian `ContainerHighCPU` menghasilkan penggunaan CPU pada container `bab7-load-generator` sebesar 0,500188 cores. Alert terdeteksi dengan status `firing`, sehingga menunjukkan bahwa Prometheus berhasil mendeteksi penggunaan CPU yang memenuhi kondisi aturan.
-
-Pengujian `TargetDown` dilakukan dengan menghentikan Node Exporter. Hasil query menunjukkan nilai `up` sebesar 0 dan alert `TargetDown` berstatus `firing`. Setelah layanan dipulihkan, metrik CPU kembali tersedia dengan nilai sekitar 0,5395 atau 53,95%.
-
-**Gambar 10. Hasil Pengujian Alert CPU**
+Selanjutnya, Node Exporter dihentikan sementara untuk menguji alert `TargetDown`. Hasilnya, nilai `up` pada job Node Exporter menjadi `0` dan alert `TargetDown` berhasil terpicu.
 
 ![Pengujian alert CPU](assets/B7-20-pengujian-alert-cpu.png)
 
-**Gambar 11. Hasil Pengujian Alert TargetDown**
-
 ![Pengujian alert TargetDown](assets/B7-21-pengujian-alert-target-down.png)
 
-**Gambar 12. Verifikasi Metrik CPU Setelah Pemulihan**
+Setelah Node Exporter dijalankan kembali, metrik CPU host kembali tersedia melalui recording rule. Hal ini menunjukkan bahwa pengumpulan metrik dapat berjalan kembali setelah layanan dipulihkan.
 
-![Verifikasi metrik CPU pulih](assets/B7-23-verifikasi-metrik-cpu-pulih.png)
+![Verifikasi metrik CPU setelah pemulihan](assets/B7-23-verifikasi-metrik-cpu-pulih.png)
 
-### 5.4 Hasil Integrasi PostgreSQL dengan Grafana
+### 5.4 Integrasi PostgreSQL Bab 6
 
-Integrasi PostgreSQL Bab 6 dengan Grafana berhasil dilakukan. Pengujian koneksi menghasilkan pesan `Database Connection OK`. Selanjutnya, query SQL berhasil menampilkan 10 data log dari tabel `logs.fluentbit`, yang terdiri atas informasi tag, waktu pencatatan, dan data log dalam format JSON.
+Integrasi PostgreSQL sebagai sumber data Grafana berhasil dilakukan. Pengujian koneksi menunjukkan hasil `Database Connection OK`. Selanjutnya, query SQL terhadap tabel `logs.fluentbit` berhasil menampilkan 10 data log terbaru yang tersimpan pada PostgreSQL.
 
-**Gambar 13. Hasil Koneksi PostgreSQL**
-
-![Koneksi PostgreSQL berhasil](assets/B7-25-integrasi-postgresql-koneksi.png)
-
-**Gambar 14. Hasil Query Data Log PostgreSQL**
-
-![Hasil query PostgreSQL](assets/B7-26-integrasi-postgresql-query.png)
+Dengan demikian, Grafana berhasil mengakses data monitoring dari Prometheus sekaligus data log dari PostgreSQL Bab 6.
