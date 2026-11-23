@@ -4,15 +4,13 @@
 
 **Disusun untuk Memenuhi Tugas Praktikum Mata Kuliah DevOps**
 
-**Topik Praktikum:** Implementasi Centralized Logging menggunakan Fluent Bit dan PostgreSQL pada Sistem PMB DevSecOps
+- **Nama:** Fitria Sari Ayuningtyas
 
-**Nama:** Fitria Sari Ayuningtyas
+- **NIM:** 3126640013
 
-**NIM:** 3126640013
+- **Kelas:** STr LJ Teknik Informatika B
 
-**Kelas:** STr LJ Teknik Informatika B
-
-**Judul Praktikum:** Monitoring Resource dengan Prometheus, cAdvisor, Node Exporter, dan Grafana
+- **Judul Praktikum:** Monitoring Resource dengan Prometheus, cAdvisor, Node Exporter, dan Grafana
 
 ## 2. Tujuan Praktikum
 
